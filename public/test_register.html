@@ -1,0 +1,19 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Login</title>
+  </head>
+  <body>
+    <form method="POST" action="/gibjohn/api/auth/register.php">
+      <input name="email" placeholder="Email" />
+      <input name="password" type="password" placeholder="Password" />
+      <select name="role">
+        <option value="learner">Learner</option>
+        <option value="tutor">Tutor</option>
+      </select>
+      <button type="submit">Register</button>
+    </form>
+  </body>
+</html>
