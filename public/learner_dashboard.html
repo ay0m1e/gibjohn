@@ -6,5 +6,77 @@
   <title>Learner Dashboard</title>
 </head>
 <body>
+  <header>
+    <h1>Learner Dashboard</h1>
+  </header>
+
+  <main>
+    <section aria-labelledby="subjects-heading">
+      <h2 id="subjects-heading">Subjects</h2>
+      <div id="subjects-container">
+        <p>Loading subjects...</p>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <p>Gibjohn Tutoring</p>
+  </footer>
+
+  <script>
+    const subjectsContainer = document.querySelector("#subjects-container");
+
+    function showMessage(message) {
+      subjectsContainer.textContent = "";
+      const paragraph = document.createElement("p");
+      paragraph.textContent = message;
+      subjectsContainer.appendChild(paragraph);
+    }
+
+    function renderSubjects(subjects) {
+      if (!Array.isArray(subjects) || subjects.length === 0) {
+        showMessage("No subjects available yet.");
+        return;
+      }
+
+      subjectsContainer.textContent = "";
+      const list = document.createElement("ul");
+
+      subjects.forEach((subject) => {
+        const item = document.createElement("li");
+        item.textContent = typeof subject === "string" ? subject : subject.name || "Untitled subject";
+        list.appendChild(item);
+      });
+
+      subjectsContainer.appendChild(list);
+    }
+
+    function normalizeSubjects(data) {
+      if (Array.isArray(data)) {
+        return data;
+      }
+
+      if (data && Array.isArray(data.subjects)) {
+        return data.subjects;
+      }
+
+      return [];
+    }
+
+    fetch("/gibjohn/api/learner/get_subjects.php")
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error("Request failed");
+        }
+
+        return response.json();
+      })
+      .then((data) => {
+        renderSubjects(normalizeSubjects(data));
+      })
+      .catch(() => {
+        showMessage("Unable to load subjects right now.");
+      });
+  </script>
 </body>
 </html>
