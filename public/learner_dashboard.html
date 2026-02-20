@@ -4,34 +4,55 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Learner Dashboard</title>
-  <link rel="stylesheet" href="../assets/css/styles.css">
+  <link rel="stylesheet" href="../assets/css/layout.css">
 </head>
 <body>
-  <header>
-    <h1>Learner Dashboard</h1>
+  <header class="site-header">
+    <div class="container header-inner">
+      <a href="index.html" class="logo">GibJohn Learning</a>
+      <nav class="nav-links">
+        <a href="learner_dashboard.html">Dashboard</a>
+        <a href="#">Profile</a>
+        <a href="/gibjohn/api/auth/logout.php">Logout</a>
+      </nav>
+    </div>
   </header>
 
   <main>
-    <section aria-labelledby="subjects-heading">
-      <h2 id="subjects-heading">Subjects</h2>
-      <div id="subjects-container">
-        <p class="status-message">Loading subjects...</p>
-      </div>
-    </section>
+    <div class="container">
+      <section class="page-header" aria-labelledby="page-title">
+        <h1 id="page-title" class="page-title">Learner Dashboard</h1>
+        <p class="page-subtitle">Pick up where you left off and keep your streak moving forward.</p>
+      </section>
+
+      <section aria-labelledby="subjects-heading">
+        <h2 id="subjects-heading" class="section-title">Your Subjects</h2>
+        <div id="subjects-container" class="subject-grid">
+          <p class="status-message">Loading subjects...</p>
+        </div>
+      </section>
+    </div>
   </main>
 
-  <footer>
-    <p>Gibjohn Tutoring</p>
+  <footer class="site-footer">
+    <div class="container">
+      <p>Gibjohn Tutoring</p>
+    </div>
   </footer>
 
   <script>
     const subjectsContainer = document.querySelector("#subjects-container");
 
-    function showMessage(message, isError) {
+    function showMessage(message, isError, isEmpty) {
       subjectsContainer.textContent = "";
       const paragraph = document.createElement("p");
       paragraph.textContent = message;
       paragraph.className = isError ? "status-message error" : "status-message";
+
+      if (isEmpty) {
+        paragraph.className += " empty-state";
+      }
+
       subjectsContainer.appendChild(paragraph);
     }
 
@@ -47,55 +68,105 @@
       return [];
     }
 
-    function createSubjectCard(subject) {
-      const card = document.createElement("article");
-      card.className = "subject-card";
+    function clampProgress(value) {
+      const number = Number(value);
 
-      const title = document.createElement("h3");
-      const description = document.createElement("p");
-      const subjectId = subject && typeof subject === "object" ? subject.id : null;
-
-      if (typeof subject === "string") {
-        title.textContent = subject;
-        description.textContent = "No description available.";
-      } else {
-        title.textContent = subject && subject.name ? subject.name : "Untitled subject";
-        description.textContent = subject && subject.description ? subject.description : "No description available.";
+      if (Number.isNaN(number)) {
+        return 0;
       }
 
-      if (subjectId !== null && subjectId !== undefined && subjectId !== "") {
-        card.addEventListener("click", function () {
+      return Math.max(0, Math.min(100, number));
+    }
+
+    function createSubjectCard(subject) {
+      const subjectId = subject && subject.id ? subject.id : null;
+      const subjectName = subject && subject.name ? subject.name : "Untitled subject";
+      const subjectDescription = subject && subject.description ? subject.description : "No description available.";
+      const totalContent = Number(subject && subject.total_content ? subject.total_content : 0);
+      const completedContent = Number(subject && subject.completed_content ? subject.completed_content : 0);
+      const progressPercentage = clampProgress(subject && subject.progress_percentage);
+
+      const card = document.createElement("article");
+      card.className = "card subject-card";
+
+      const title = document.createElement("h3");
+      title.textContent = subjectName;
+
+      const description = document.createElement("p");
+      description.className = "subject-description";
+      description.textContent = subjectDescription;
+
+      const footer = document.createElement("div");
+      footer.className = "subject-footer";
+
+      const progressText = document.createElement("p");
+      progressText.className = "progress-text";
+      progressText.textContent = completedContent + " / " + totalContent + " completed";
+
+      const progressBar = document.createElement("progress");
+      progressBar.className = "progress-meter";
+      progressBar.max = 100;
+      progressBar.value = progressPercentage;
+      progressBar.setAttribute("aria-label", "Progress");
+
+      const button = document.createElement("button");
+      button.type = "button";
+      button.className = "btn btn-primary";
+      button.textContent = "Continue";
+
+      if (subjectId === null || subjectId === undefined || subjectId === "") {
+        button.disabled = true;
+      } else {
+        button.addEventListener("click", function () {
           window.location.href = "subject.html?subject_id=" + encodeURIComponent(subjectId);
         });
       }
 
+      footer.appendChild(progressText);
+      footer.appendChild(progressBar);
+      footer.appendChild(button);
+
       card.appendChild(title);
       card.appendChild(description);
+      card.appendChild(footer);
+
       return card;
     }
 
     fetch("/gibjohn/api/learner/get_subjects.php")
-      .then((response) => response.json().then((data) => ({ response, data })))
-      .then(({ response, data }) => {
-        if (!response.ok || (data && data.error)) {
-          throw new Error((data && data.error) ? data.error : "Unable to load subjects.");
+      .then(function (response) {
+        return response.text().then(function (raw) {
+          let data = {};
+
+          try {
+            data = JSON.parse(raw);
+          } catch (error) {
+            data = {};
+          }
+
+          return { response: response, data: data };
+        });
+      })
+      .then(function (result) {
+        if (!result.response.ok || (result.data && result.data.error)) {
+          throw new Error((result.data && result.data.error) ? result.data.error : "Unable to load subjects.");
         }
 
-        const subjects = normalizeSubjects(data);
+        const subjects = normalizeSubjects(result.data);
 
         if (subjects.length === 0) {
-          showMessage("No subjects available yet.", false);
+          showMessage("No subjects available yet. New lessons will appear here soon.", false, true);
           return;
         }
 
         subjectsContainer.textContent = "";
-        subjects.forEach((subject) => {
+        subjects.forEach(function (subject) {
           const card = createSubjectCard(subject);
           subjectsContainer.appendChild(card);
         });
       })
-      .catch((error) => {
-        showMessage(error.message || "Unable to load subjects right now.", true);
+      .catch(function (error) {
+        showMessage(error.message || "Unable to load subjects right now.", true, false);
       });
   </script>
 </body>

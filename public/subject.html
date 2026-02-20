@@ -4,24 +4,40 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Subject Content</title>
-  <link rel="stylesheet" href="../assets/css/styles.css">
+  <link rel="stylesheet" href="../assets/css/layout.css">
 </head>
 <body>
-  <header>
-    <h1>Subject Content</h1>
+  <header class="site-header">
+    <div class="container header-inner">
+      <a href="index.html" class="logo">GibJohn Learning</a>
+      <nav class="nav-links">
+        <a href="learner_dashboard.html">Dashboard</a>
+        <a href="#">Profile</a>
+        <a href="/gibjohn/api/auth/logout.php">Logout</a>
+      </nav>
+    </div>
   </header>
 
   <main>
-    <section aria-labelledby="content-heading">
-      <h2 id="content-heading">Learning Content</h2>
-      <div id="content-container">
-        <p class="status-message">Loading content...</p>
-      </div>
-    </section>
+    <div class="container">
+      <section class="page-header" aria-labelledby="subject-title">
+        <h1 id="subject-title" class="page-title">Subject Content</h1>
+        <p class="page-subtitle">Complete each learning activity in order and track your progress.</p>
+      </section>
+
+      <section aria-labelledby="content-heading">
+        <h2 id="content-heading" class="section-title">Learning Activities</h2>
+        <div id="content-container" class="content-stack">
+          <p class="status-message">Loading content...</p>
+        </div>
+      </section>
+    </div>
   </main>
 
-  <footer>
-    <p>Gibjohn Tutoring</p>
+  <footer class="site-footer">
+    <div class="container">
+      <p>Gibjohn Tutoring</p>
+    </div>
   </footer>
 
   <script>
@@ -29,10 +45,15 @@
     const params = new URLSearchParams(window.location.search);
     const subjectId = params.get("subject_id");
 
-    function showMessage(text, isError) {
+    function showMessage(text, isError, isEmpty) {
       contentContainer.textContent = "";
       const message = document.createElement("p");
       message.className = isError ? "status-message error" : "status-message";
+
+      if (isEmpty) {
+        message.className += " empty-state";
+      }
+
       message.textContent = text;
       contentContainer.appendChild(message);
     }
@@ -57,7 +78,15 @@
       return [];
     }
 
-    async function markComplete(contentId, button) {
+    function setCompletedState(card, badge, button) {
+      card.classList.add("is-completed");
+      badge.className = "status-badge completed";
+      badge.textContent = "Completed";
+      button.textContent = "Completed";
+      button.disabled = true;
+    }
+
+    async function markComplete(contentId, button, card, badge) {
       button.disabled = true;
       button.textContent = "Saving...";
 
@@ -77,45 +106,70 @@
           throw new Error((data && data.error) ? data.error : "Could not mark complete.");
         }
 
-        button.textContent = "Completed";
-        button.disabled = true;
+        setCompletedState(card, badge, button);
       } catch (error) {
         button.disabled = false;
         button.textContent = "Mark Complete";
-        showMessage(error.message || "Unable to mark content complete.", true);
+        showMessage(error.message || "Unable to mark content complete.", true, false);
       }
     }
 
     function renderContentItems(items) {
       if (!Array.isArray(items) || items.length === 0) {
-        showMessage("No content found for this subject.", false);
+        showMessage("No content found for this subject.", false, true);
         return;
       }
 
       contentContainer.textContent = "";
 
-      items.forEach(function (item) {
+      items.forEach(function (item, index) {
         const card = document.createElement("article");
-        card.className = "subject-card";
+        card.className = "card content-card";
+
+        const meta = document.createElement("div");
+        meta.className = "content-meta";
+
+        const title = document.createElement("h3");
+        title.textContent = "Activity " + (index + 1);
+
+        const badge = document.createElement("span");
+        badge.className = "status-badge";
+        badge.textContent = "Pending";
 
         const text = document.createElement("p");
+        text.className = "content-text";
         text.textContent = item && item.content_text ? item.content_text : "No content text available.";
+
+        const actions = document.createElement("div");
+        actions.className = "content-actions";
 
         const button = document.createElement("button");
         button.type = "button";
+        button.className = "btn btn-primary";
         button.textContent = "Mark Complete";
-        button.addEventListener("click", function () {
-          markComplete(item.id, button);
-        });
 
+        const isCompleted = Number(item && item.completed) === 1;
+        if (isCompleted) {
+          setCompletedState(card, badge, button);
+        } else {
+          button.addEventListener("click", function () {
+            markComplete(item.id, button, card, badge);
+          });
+        }
+
+        meta.appendChild(title);
+        meta.appendChild(badge);
+        actions.appendChild(button);
+
+        card.appendChild(meta);
         card.appendChild(text);
-        card.appendChild(button);
+        card.appendChild(actions);
         contentContainer.appendChild(card);
       });
     }
 
     if (!subjectId) {
-      showMessage("Missing subject_id in URL.", true);
+      showMessage("Missing subject_id in URL.", true, false);
     } else {
       fetch("/gibjohn/api/learner/get_content.php?subject_id=" + encodeURIComponent(subjectId))
         .then(function (response) {
@@ -133,7 +187,7 @@
           renderContentItems(toContentItems(data));
         })
         .catch(function (error) {
-          showMessage(error.message || "Unable to load subject content.", true);
+          showMessage(error.message || "Unable to load subject content.", true, false);
         });
     }
   </script>
