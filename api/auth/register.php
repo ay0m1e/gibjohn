@@ -6,7 +6,7 @@ require __DIR__ . '/../core/db.php';
 header ('Content-|Type: application/json');
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST'){
-    http_response_code-code(405);
+    http_response_code(405);
     echo json_encode(['error' => 'Method not allowed']);
     exit;
 }
@@ -39,7 +39,7 @@ if (!in_array($role, ['learner', 'tutor'])) {
 $passwordHash = password_hash($password, PASSWORD_DEFAULT);
 
 try {
-    stmt = $pdo->prepare(
+    $stmt = $pdo->prepare(
         "INSERT INTO users (email, password_hash, role)
         VALUES (:email, :password_hash, :role)"
     );
@@ -47,7 +47,7 @@ try {
 
     $stmt -> execute([
         'email' => $email,
-        'password_hash' => $passwordHash
+        'password_hash' => $passwordHash,
         'role' => $role
     ]);
 

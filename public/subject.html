@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Subject Content</title>
+  <link rel="stylesheet" href="../assets/css/styles.css">
+</head>
+<body>
+  <header>
+    <h1>Subject Content</h1>
+  </header>
+
+  <main>
+    <section aria-labelledby="content-heading">
+      <h2 id="content-heading">Learning Content</h2>
+      <div id="content-container">
+        <p class="status-message">Loading content...</p>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <p>Gibjohn Tutoring</p>
+  </footer>
+
+  <script>
+    const contentContainer = document.querySelector("#content-container");
+    const params = new URLSearchParams(window.location.search);
+    const subjectId = params.get("subject_id");
+
+    function showMessage(text, isError) {
+      contentContainer.textContent = "";
+      const message = document.createElement("p");
+      message.className = isError ? "status-message error" : "status-message";
+      message.textContent = text;
+      contentContainer.appendChild(message);
+    }
+
+    function parseJsonSafely(rawText) {
+      try {
+        return JSON.parse(rawText);
+      } catch (error) {
+        return null;
+      }
+    }
+
+    function toContentItems(data) {
+      if (data && Array.isArray(data.content)) {
+        return data.content;
+      }
+
+      if (Array.isArray(data)) {
+        return data;
+      }
+
+      return [];
+    }
+
+    async function markComplete(contentId, button) {
+      button.disabled = true;
+      button.textContent = "Saving...";
+
+      try {
+        const formData = new FormData();
+        formData.append("content_id", contentId);
+
+        const response = await fetch("/gibjohn/api/learner/complete_activity.php", {
+          method: "POST",
+          body: formData
+        });
+
+        const raw = await response.text();
+        const data = parseJsonSafely(raw);
+
+        if (!response.ok || !data || data.success !== true) {
+          throw new Error((data && data.error) ? data.error : "Could not mark complete.");
+        }
+
+        button.textContent = "Completed";
+        button.disabled = true;
+      } catch (error) {
+        button.disabled = false;
+        button.textContent = "Mark Complete";
+        showMessage(error.message || "Unable to mark content complete.", true);
+      }
+    }
+
+    function renderContentItems(items) {
+      if (!Array.isArray(items) || items.length === 0) {
+        showMessage("No content found for this subject.", false);
+        return;
+      }
+
+      contentContainer.textContent = "";
+
+      items.forEach(function (item) {
+        const card = document.createElement("article");
+        card.className = "subject-card";
+
+        const text = document.createElement("p");
+        text.textContent = item && item.content_text ? item.content_text : "No content text available.";
+
+        const button = document.createElement("button");
+        button.type = "button";
+        button.textContent = "Mark Complete";
+        button.addEventListener("click", function () {
+          markComplete(item.id, button);
+        });
+
+        card.appendChild(text);
+        card.appendChild(button);
+        contentContainer.appendChild(card);
+      });
+    }
+
+    if (!subjectId) {
+      showMessage("Missing subject_id in URL.", true);
+    } else {
+      fetch("/gibjohn/api/learner/get_content.php?subject_id=" + encodeURIComponent(subjectId))
+        .then(function (response) {
+          return response.text().then(function (raw) {
+            return { response: response, raw: raw };
+          });
+        })
+        .then(function (result) {
+          const data = parseJsonSafely(result.raw);
+
+          if (!result.response.ok || !data || data.error) {
+            throw new Error((data && data.error) ? data.error : "Failed to load subject content.");
+          }
+
+          renderContentItems(toContentItems(data));
+        })
+        .catch(function (error) {
+          showMessage(error.message || "Unable to load subject content.", true);
+        });
+    }
+  </script>
+</body>
+</html>

@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Learner Dashboard</title>
+  <link rel="stylesheet" href="../assets/css/styles.css">
 </head>
 <body>
   <header>
@@ -14,7 +15,7 @@
     <section aria-labelledby="subjects-heading">
       <h2 id="subjects-heading">Subjects</h2>
       <div id="subjects-container">
-        <p>Loading subjects...</p>
+        <p class="status-message">Loading subjects...</p>
       </div>
     </section>
   </main>
@@ -26,29 +27,12 @@
   <script>
     const subjectsContainer = document.querySelector("#subjects-container");
 
-    function showMessage(message) {
+    function showMessage(message, isError) {
       subjectsContainer.textContent = "";
       const paragraph = document.createElement("p");
       paragraph.textContent = message;
+      paragraph.className = isError ? "status-message error" : "status-message";
       subjectsContainer.appendChild(paragraph);
-    }
-
-    function renderSubjects(subjects) {
-      if (!Array.isArray(subjects) || subjects.length === 0) {
-        showMessage("No subjects available yet.");
-        return;
-      }
-
-      subjectsContainer.textContent = "";
-      const list = document.createElement("ul");
-
-      subjects.forEach((subject) => {
-        const item = document.createElement("li");
-        item.textContent = typeof subject === "string" ? subject : subject.name || "Untitled subject";
-        list.appendChild(item);
-      });
-
-      subjectsContainer.appendChild(list);
     }
 
     function normalizeSubjects(data) {
@@ -63,19 +47,55 @@
       return [];
     }
 
+    function createSubjectCard(subject) {
+      const card = document.createElement("article");
+      card.className = "subject-card";
+
+      const title = document.createElement("h3");
+      const description = document.createElement("p");
+      const subjectId = subject && typeof subject === "object" ? subject.id : null;
+
+      if (typeof subject === "string") {
+        title.textContent = subject;
+        description.textContent = "No description available.";
+      } else {
+        title.textContent = subject && subject.name ? subject.name : "Untitled subject";
+        description.textContent = subject && subject.description ? subject.description : "No description available.";
+      }
+
+      if (subjectId !== null && subjectId !== undefined && subjectId !== "") {
+        card.addEventListener("click", function () {
+          window.location.href = "subject.html?subject_id=" + encodeURIComponent(subjectId);
+        });
+      }
+
+      card.appendChild(title);
+      card.appendChild(description);
+      return card;
+    }
+
     fetch("/gibjohn/api/learner/get_subjects.php")
-      .then((response) => {
-        if (!response.ok) {
-          throw new Error("Request failed");
+      .then((response) => response.json().then((data) => ({ response, data })))
+      .then(({ response, data }) => {
+        if (!response.ok || (data && data.error)) {
+          throw new Error((data && data.error) ? data.error : "Unable to load subjects.");
         }
 
-        return response.json();
+        const subjects = normalizeSubjects(data);
+
+        if (subjects.length === 0) {
+          showMessage("No subjects available yet.", false);
+          return;
+        }
+
+        subjectsContainer.textContent = "";
+        subjects.forEach((subject) => {
+          const card = createSubjectCard(subject);
+          subjectsContainer.appendChild(card);
+        });
       })
-      .then((data) => {
-        renderSubjects(normalizeSubjects(data));
-      })
-      .catch(() => {
-        showMessage("Unable to load subjects right now.");
+      .catch((error) => {
+        showMessage(error.message || "Unable to load subjects right now.", true);
       });
   </script>
 </body>

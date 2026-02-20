@@ -4,7 +4,74 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Register</title>
+  <link rel="stylesheet" href="../assets/css/styles.css">
 </head>
-<body>
+<body class="register-page">
+  <header>
+    <h1>Register</h1>
+  </header>
+
+  <main>
+    <section aria-labelledby="register-heading">
+      <h2 id="register-heading">Create Account</h2>
+      <form id="register-form" method="POST" action="/gibjohn/api/auth/register.php">
+        <input name="email" type="email" placeholder="Email" required>
+        <input name="password" type="password" placeholder="Password" minlength="6" required>
+        <select name="role" required>
+          <option value="learner">Learner</option>
+          <option value="tutor">Tutor</option>
+        </select>
+        <button type="submit">Register</button>
+      </form>
+      <p id="register-message" class="message" aria-live="polite"></p>
+    </section>
+  </main>
+
+  <footer>
+    <p>Gibjohn Tutoring</p>
+  </footer>
+
+  <script>
+    const form = document.querySelector("#register-form");
+    const message = document.querySelector("#register-message");
+
+    function setMessage(text, isError) {
+      message.textContent = text;
+      message.className = isError ? "message error" : "message";
+    }
+
+    form.addEventListener("submit", async function (event) {
+      event.preventDefault();
+      setMessage("Registering...", false);
+
+      try {
+        const response = await fetch("/gibjohn/api/auth/register.php", {
+          method: "POST",
+          body: new FormData(form)
+        });
+
+        const raw = await response.text();
+        let data = {};
+
+        try {
+          data = JSON.parse(raw);
+        } catch (parseError) {
+          data = {};
+        }
+
+        if (!response.ok || !data.success) {
+          setMessage(data.error || "Registration failed.", true);
+          return;
+        }
+
+        setMessage("Registration successful. Redirecting to login...", false);
+        setTimeout(function () {
+          window.location.href = "login.html";
+        }, 1200);
+      } catch (error) {
+        setMessage("Unable to register right now.", true);
+      }
+    });
+  </script>
 </body>
 </html>

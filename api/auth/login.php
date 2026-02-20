@@ -38,11 +38,11 @@ $stmt = $pdo->prepare(
 );
 
 
-$stmt -> execute(['email' => $email]);
+$stmt->execute(['email' => $email]);
 $user = $stmt->fetch();
 
-if (!user) {
-    http_response_code(401)
+if (!$user || !password_verify($password, $user['password_hash'])) {
+    http_response_code(401);
     echo json_encode(['error' => 'Invalid credentials']);
     exit;
 }

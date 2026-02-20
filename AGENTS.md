@@ -34,6 +34,7 @@ Avoid generic app scaffolding and framework-heavy patterns.
 
 ## CSS Rules
 - Keep class naming consistent and descriptive.
+- Do not use inline styles or `<style>` blocks in pages; keep styling in external CSS files.
 - Prefer direct values over design token systems.
 - Maintain a calm, simple interface style.
 - Use Flexbox for layout where appropriate.
