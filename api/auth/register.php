@@ -3,7 +3,7 @@
 session_start();
 require __DIR__ . '/../core/db.php';
 
-header ('Content-|Type: application/json');
+header('Content-Type: application/json');
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST'){
     http_response_code(405);
@@ -19,7 +19,7 @@ $role = $_POST['role'] ?? 'learner';
 
 if (!$email || !filter_var($email, FILTER_VALIDATE_EMAIL)) {
     http_response_code(400);
-    echo json_encode(['error' => 'VAlid email required']);
+    echo json_encode(['error' => 'Valid email required']);
     exit;
 }
 

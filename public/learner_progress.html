@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Learner Dashboard</title>
+  <title>Learner Progress</title>
   <link rel="stylesheet" href="../assets/css/layout.css">
 </head>
 <body>
@@ -16,8 +16,8 @@
         <span></span>
       </button>
       <nav class="nav-links">
-        <a href="learner_dashboard.html">Dashboard</a>
-        <a href="profile.html">Profile</a>
+        <a href="tutor_dashboard.html">Dashboard</a>
+        <a href="index.html">Home</a>
         <a href="/gibjohn/api/auth/logout.php">Logout</a>
       </nav>
     </div>
@@ -26,14 +26,14 @@
   <main>
     <div class="container">
       <section class="page-header" aria-labelledby="page-title">
-        <h1 id="page-title" class="page-title">Learner Dashboard</h1>
-        <p class="page-subtitle">Pick up where you left off and keep your streak moving forward.</p>
+        <h1 id="page-title" class="page-title">Learner Progress</h1>
+        <p id="page-subtitle" class="page-subtitle">Loading learner details...</p>
       </section>
 
       <section aria-labelledby="subjects-heading">
-        <h2 id="subjects-heading" class="section-title">Your Subjects</h2>
-        <div id="subjects-container" class="subject-grid">
-          <p class="status-message">Loading subjects...</p>
+        <h2 id="subjects-heading" class="section-title">Subject Progress</h2>
+        <div id="progress-container" class="subject-grid">
+          <p class="status-message">Loading progress...</p>
         </div>
       </section>
     </div>
@@ -46,45 +46,43 @@
   </footer>
 
   <script>
-    const subjectsContainer = document.querySelector("#subjects-container");
+    const progressContainer = document.querySelector("#progress-container");
+    const subtitle = document.querySelector("#page-subtitle");
+    const params = new URLSearchParams(window.location.search);
+    const learnerId = params.get("learner_id");
 
-    function showMessage(message, isError, isEmpty) {
-      subjectsContainer.textContent = "";
+    function showMessage(text, isError, isEmpty) {
+      progressContainer.textContent = "";
       const paragraph = document.createElement("p");
-      paragraph.textContent = message;
       paragraph.className = isError ? "status-message error" : "status-message";
+      paragraph.textContent = text;
 
       if (isEmpty) {
         paragraph.className += " empty-state";
       }
 
-      subjectsContainer.appendChild(paragraph);
+      progressContainer.appendChild(paragraph);
     }
 
-    function normalizeSubjects(data) {
-      if (Array.isArray(data)) {
-        return data;
+    function parseJson(raw) {
+      try {
+        return JSON.parse(raw);
+      } catch (error) {
+        return null;
       }
-
-      if (data && Array.isArray(data.subjects)) {
-        return data.subjects;
-      }
-
-      return [];
     }
 
     function clampProgress(value) {
-      const number = Number(value);
+      const numericValue = Number(value);
 
-      if (Number.isNaN(number)) {
+      if (Number.isNaN(numericValue)) {
         return 0;
       }
 
-      return Math.max(0, Math.min(100, number));
+      return Math.max(0, Math.min(100, numericValue));
     }
 
     function createSubjectCard(subject) {
-      const subjectId = subject && subject.id ? subject.id : null;
       const subjectName = subject && subject.name ? subject.name : "Untitled subject";
       const subjectDescription = subject && subject.description ? subject.description : "No description available.";
       const totalContent = Number(subject && subject.total_content ? subject.total_content : 0);
@@ -106,7 +104,7 @@
 
       const progressText = document.createElement("p");
       progressText.className = "progress-text";
-      progressText.textContent = completedContent + " / " + totalContent + " completed";
+      progressText.textContent = completedContent + " / " + totalContent + " completed (" + progressPercentage + "%)";
 
       const progressBar = document.createElement("progress");
       progressBar.className = "progress-meter";
@@ -114,22 +112,8 @@
       progressBar.value = progressPercentage;
       progressBar.setAttribute("aria-label", "Progress");
 
-      const button = document.createElement("button");
-      button.type = "button";
-      button.className = "btn btn-primary";
-      button.textContent = "Continue";
-
-      if (subjectId === null || subjectId === undefined || subjectId === "") {
-        button.disabled = true;
-      } else {
-        button.addEventListener("click", function () {
-          window.location.href = "subject.html?subject_id=" + encodeURIComponent(subjectId);
-        });
-      }
-
       footer.appendChild(progressText);
       footer.appendChild(progressBar);
-      footer.appendChild(button);
 
       card.appendChild(title);
       card.appendChild(description);
@@ -138,41 +122,46 @@
       return card;
     }
 
-    fetch("/gibjohn/api/learner/get_subjects.php")
-      .then(function (response) {
-        return response.text().then(function (raw) {
-          let data = {};
-
-          try {
-            data = JSON.parse(raw);
-          } catch (error) {
-            data = {};
+    if (!learnerId) {
+      subtitle.textContent = "Learner ID is missing.";
+      showMessage("Missing learner_id in URL.", true, false);
+    } else {
+      fetch("/gibjohn/api/tutor/get_learner_progress.php?learner_id=" + encodeURIComponent(learnerId))
+        .then(function (response) {
+          return response.text().then(function (raw) {
+            return {
+              response: response,
+              data: parseJson(raw)
+            };
+          });
+        })
+        .then(function (result) {
+          if (!result.response.ok || !result.data || result.data.error) {
+            throw new Error((result.data && result.data.error) ? result.data.error : "Unable to load learner progress.");
           }
 
-          return { response: response, data: data };
+          const learnerEmail = result.data.learner && result.data.learner.email
+            ? result.data.learner.email
+            : "Selected learner";
+          subtitle.textContent = "Read-only progress overview for " + learnerEmail + ".";
+
+          const subjects = Array.isArray(result.data.subjects) ? result.data.subjects : [];
+
+          if (subjects.length === 0) {
+            showMessage("No subject data found for this learner.", false, true);
+            return;
+          }
+
+          progressContainer.textContent = "";
+          subjects.forEach(function (subject) {
+            progressContainer.appendChild(createSubjectCard(subject));
+          });
+        })
+        .catch(function (error) {
+          subtitle.textContent = "Unable to load learner details.";
+          showMessage(error.message || "Unable to load learner progress right now.", true, false);
         });
-      })
-      .then(function (result) {
-        if (!result.response.ok || (result.data && result.data.error)) {
-          throw new Error((result.data && result.data.error) ? result.data.error : "Unable to load subjects.");
-        }
-
-        const subjects = normalizeSubjects(result.data);
-
-        if (subjects.length === 0) {
-          showMessage("No subjects available yet. New lessons will appear here soon.", false, true);
-          return;
-        }
-
-        subjectsContainer.textContent = "";
-        subjects.forEach(function (subject) {
-          const card = createSubjectCard(subject);
-          subjectsContainer.appendChild(card);
-        });
-      })
-      .catch(function (error) {
-        showMessage(error.message || "Unable to load subjects right now.", true, false);
-      });
+    }
   </script>
   <script>
     document.addEventListener("DOMContentLoaded", function () {

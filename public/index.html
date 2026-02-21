@@ -10,6 +10,11 @@
   <header class="site-header">
     <div class="container header-inner">
       <a href="index.html" class="logo">GibJohn Learning</a>
+      <button class="hamburger" type="button" aria-label="Toggle navigation" aria-expanded="false">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
       <nav class="nav-links">
         <a href="index.html">Home</a>
         <a href="register.html">Get Started</a>
@@ -155,5 +160,29 @@
       <p>Gibjohn Tutoring</p>
     </div>
   </footer>
+  <script>
+    document.addEventListener("DOMContentLoaded", function () {
+      const hamburger = document.querySelector(".hamburger");
+      const navLinks = document.querySelector(".nav-links");
+
+      if (!hamburger || !navLinks) {
+        return;
+      }
+
+      hamburger.addEventListener("click", function () {
+        const isOpen = navLinks.classList.toggle("is-open");
+        hamburger.classList.toggle("is-open", isOpen);
+        hamburger.setAttribute("aria-expanded", isOpen ? "true" : "false");
+      });
+
+      navLinks.querySelectorAll("a").forEach(function (link) {
+        link.addEventListener("click", function () {
+          navLinks.classList.remove("is-open");
+          hamburger.classList.remove("is-open");
+          hamburger.setAttribute("aria-expanded", "false");
+        });
+      });
+    });
+  </script>
 </body>
 </html>

@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Learner Profile</title>
+  <link rel="stylesheet" href="../assets/css/layout.css">
+</head>
+<body class="profile-page">
+  <header class="site-header">
+    <div class="container header-inner">
+      <a href="index.html" class="logo">GibJohn Learning</a>
+      <button class="hamburger" type="button" aria-label="Toggle navigation" aria-expanded="false">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+      <nav class="nav-links">
+        <a href="learner_dashboard.html">Dashboard</a>
+        <a href="profile.html">Profile</a>
+        <a href="/gibjohn/api/auth/logout.php">Logout</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <div class="container">
+      <section class="page-header" aria-labelledby="profile-title">
+        <h1 id="profile-title" class="page-title">Learner Profile</h1>
+        <p class="page-subtitle">Review your account details, total completed activities, and earned rewards.</p>
+      </section>
+
+      <section class="profile-section" aria-labelledby="summary-heading">
+        <h2 id="summary-heading" class="section-title">Account Summary</h2>
+        <div class="subject-grid profile-summary-grid">
+          <article class="card">
+            <h3>Email</h3>
+            <p id="profile-email" class="subject-description">Loading...</p>
+          </article>
+          <article class="card">
+            <h3>Total Completed</h3>
+            <p id="total-completed" class="subject-description">Loading...</p>
+          </article>
+        </div>
+      </section>
+
+      <section class="profile-section" aria-labelledby="rewards-heading">
+        <h2 id="rewards-heading" class="section-title">Rewards</h2>
+        <div id="rewards-container" class="subject-grid rewards-grid">
+          <p class="status-message">Loading rewards...</p>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container">
+      <p>Gibjohn Tutoring</p>
+    </div>
+  </footer>
+
+  <script>
+    const profileEmail = document.querySelector("#profile-email");
+    const totalCompleted = document.querySelector("#total-completed");
+    const rewardsContainer = document.querySelector("#rewards-container");
+
+    function showRewardsMessage(text, isError, isEmpty) {
+      rewardsContainer.textContent = "";
+      const paragraph = document.createElement("p");
+      paragraph.className = isError ? "status-message error" : "status-message";
+      paragraph.textContent = text;
+
+      if (isEmpty) {
+        paragraph.className += " empty-state";
+      }
+
+      rewardsContainer.appendChild(paragraph);
+    }
+
+    function parseJson(raw) {
+      try {
+        return JSON.parse(raw);
+      } catch (error) {
+        return null;
+      }
+    }
+
+    function formatEarnedDate(value) {
+      const date = new Date(value);
+
+      if (Number.isNaN(date.getTime())) {
+        return "Recently earned";
+      }
+
+      return date.toLocaleDateString();
+    }
+
+    function renderRewards(rewards) {
+      if (!Array.isArray(rewards) || rewards.length === 0) {
+        showRewardsMessage("No rewards earned yet. Keep completing activities to unlock badges.", false, true);
+        return;
+      }
+
+      rewardsContainer.textContent = "";
+
+      rewards.forEach(function (reward) {
+        const card = document.createElement("article");
+        card.className = "card";
+
+        const title = document.createElement("h3");
+        title.textContent = reward && reward.badge_name ? reward.badge_name : "Reward";
+
+        const detail = document.createElement("p");
+        detail.className = "subject-description";
+        detail.textContent = "Earned on " + formatEarnedDate(reward && reward.earned_at);
+
+        card.appendChild(title);
+        card.appendChild(detail);
+        rewardsContainer.appendChild(card);
+      });
+    }
+
+    fetch("/gibjohn/api/learner/get_profile.php")
+      .then(function (response) {
+        return response.text().then(function (raw) {
+          return {
+            response: response,
+            data: parseJson(raw)
+          };
+        });
+      })
+      .then(function (result) {
+        if (!result.response.ok || !result.data || result.data.error) {
+          throw new Error((result.data && result.data.error) ? result.data.error : "Unable to load profile.");
+        }
+
+        profileEmail.textContent = result.data.email || "Not available";
+        totalCompleted.textContent = String(result.data.total_completed || 0);
+        renderRewards(result.data.rewards || []);
+      })
+      .catch(function (error) {
+        profileEmail.textContent = "Not available";
+        totalCompleted.textContent = "0";
+        showRewardsMessage(error.message || "Unable to load rewards right now.", true, false);
+      });
+  </script>
+  <script>
+    document.addEventListener("DOMContentLoaded", function () {
+      const hamburger = document.querySelector(".hamburger");
+      const navLinks = document.querySelector(".nav-links");
+
+      if (!hamburger || !navLinks) {
+        return;
+      }
+
+      hamburger.addEventListener("click", function () {
+        const isOpen = navLinks.classList.toggle("is-open");
+        hamburger.classList.toggle("is-open", isOpen);
+        hamburger.setAttribute("aria-expanded", isOpen ? "true" : "false");
+      });
+
+      navLinks.querySelectorAll("a").forEach(function (link) {
+        link.addEventListener("click", function () {
+          navLinks.classList.remove("is-open");
+          hamburger.classList.remove("is-open");
+          hamburger.setAttribute("aria-expanded", "false");
+        });
+      });
+    });
+  </script>
+</body>
+</html>

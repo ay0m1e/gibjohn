@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tutor Dashboard</title>
+  <link rel="stylesheet" href="../assets/css/layout.css">
+</head>
+<body>
+  <header class="site-header">
+    <div class="container header-inner">
+      <a href="index.html" class="logo">GibJohn Learning</a>
+      <button class="hamburger" type="button" aria-label="Toggle navigation" aria-expanded="false">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+      <nav class="nav-links">
+        <a href="tutor_dashboard.html">Dashboard</a>
+        <a href="index.html">Home</a>
+        <a href="/gibjohn/api/auth/logout.php">Logout</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <div class="container">
+      <section class="page-header" aria-labelledby="page-title">
+        <h1 id="page-title" class="page-title">Tutor Dashboard</h1>
+        <p class="page-subtitle">Select a learner to view subject progress and completion status.</p>
+      </section>
+
+      <section aria-labelledby="learners-heading">
+        <h2 id="learners-heading" class="section-title">Learners</h2>
+        <div id="learners-container" class="subject-grid">
+          <p class="status-message">Loading learners...</p>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container">
+      <p>Gibjohn Tutoring</p>
+    </div>
+  </footer>
+
+  <script>
+    const learnersContainer = document.querySelector("#learners-container");
+
+    function showMessage(text, isError, isEmpty) {
+      learnersContainer.textContent = "";
+      const paragraph = document.createElement("p");
+      paragraph.className = isError ? "status-message error" : "status-message";
+      paragraph.textContent = text;
+
+      if (isEmpty) {
+        paragraph.className += " empty-state";
+      }
+
+      learnersContainer.appendChild(paragraph);
+    }
+
+    function parseJson(raw) {
+      try {
+        return JSON.parse(raw);
+      } catch (error) {
+        return null;
+      }
+    }
+
+    function getLearners(data) {
+      if (data && Array.isArray(data.learners)) {
+        return data.learners;
+      }
+
+      if (Array.isArray(data)) {
+        return data;
+      }
+
+      return [];
+    }
+
+    function createLearnerCard(learner) {
+      const learnerId = learner && learner.id ? learner.id : null;
+      const learnerEmail = learner && learner.email ? learner.email : "Learner";
+
+      const card = document.createElement("article");
+      card.className = "card subject-card";
+
+      const title = document.createElement("h3");
+      title.textContent = learnerEmail;
+
+      const description = document.createElement("p");
+      description.className = "subject-description";
+      description.textContent = "View subject completion and current progress.";
+
+      const footer = document.createElement("div");
+      footer.className = "subject-footer";
+
+      const button = document.createElement("button");
+      button.type = "button";
+      button.className = "btn btn-primary";
+      button.textContent = "View Progress";
+
+      if (learnerId === null || learnerId === undefined || learnerId === "") {
+        button.disabled = true;
+      } else {
+        button.addEventListener("click", function () {
+          window.location.href = "learner_progress.html?learner_id=" + encodeURIComponent(learnerId);
+        });
+      }
+
+      footer.appendChild(button);
+      card.appendChild(title);
+      card.appendChild(description);
+      card.appendChild(footer);
+
+      return card;
+    }
+
+    fetch("/gibjohn/api/tutor/get_learners.php")
+      .then(function (response) {
+        return response.text().then(function (raw) {
+          return {
+            response: response,
+            data: parseJson(raw)
+          };
+        });
+      })
+      .then(function (result) {
+        if (!result.response.ok || !result.data || result.data.error) {
+          throw new Error((result.data && result.data.error) ? result.data.error : "Unable to load learners.");
+        }
+
+        const learners = getLearners(result.data);
+
+        if (learners.length === 0) {
+          showMessage("No learners found.", false, true);
+          return;
+        }
+
+        learnersContainer.textContent = "";
+        learners.forEach(function (learner) {
+          learnersContainer.appendChild(createLearnerCard(learner));
+        });
+      })
+      .catch(function (error) {
+        showMessage(error.message || "Unable to load learners right now.", true, false);
+      });
+  </script>
+  <script>
+    document.addEventListener("DOMContentLoaded", function () {
+      const hamburger = document.querySelector(".hamburger");
+      const navLinks = document.querySelector(".nav-links");
+
+      if (!hamburger || !navLinks) {
+        return;
+      }
+
+      hamburger.addEventListener("click", function () {
+        const isOpen = navLinks.classList.toggle("is-open");
+        hamburger.classList.toggle("is-open", isOpen);
+        hamburger.setAttribute("aria-expanded", isOpen ? "true" : "false");
+      });
+
+      navLinks.querySelectorAll("a").forEach(function (link) {
+        link.addEventListener("click", function () {
+          navLinks.classList.remove("is-open");
+          hamburger.classList.remove("is-open");
+          hamburger.setAttribute("aria-expanded", "false");
+        });
+      });
+    });
+  </script>
+</body>
+</html>
