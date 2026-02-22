@@ -6,50 +6,106 @@
   <title>Tutor Dashboard</title>
   <link rel="stylesheet" href="../assets/css/layout.css">
 </head>
-<body>
-  <header class="site-header">
-    <div class="container header-inner">
-      <a href="index.html" class="logo">GibJohn Learning</a>
-      <button class="hamburger" type="button" aria-label="Toggle navigation" aria-expanded="false">
-        <span></span>
-        <span></span>
-        <span></span>
-      </button>
-      <nav class="nav-links">
-        <a href="tutor_dashboard.html">Dashboard</a>
-        <a href="index.html">Home</a>
-        <a href="/gibjohn/api/auth/logout.php">Logout</a>
-      </nav>
-    </div>
+<body class="app-shell">
+  <header class="mobile-topbar" aria-label="Mobile navigation bar">
+    <button class="hamburger" type="button" aria-label="Toggle sidebar" aria-expanded="false" aria-controls="tutor-sidebar">
+      <span></span>
+      <span></span>
+      <span></span>
+    </button>
+    <a href="index.html" class="logo">GibJohn Learning</a>
   </header>
 
-  <main>
-    <div class="container">
-      <section class="page-header" aria-labelledby="page-title">
-        <h1 id="page-title" class="page-title">Tutor Dashboard</h1>
-        <p class="page-subtitle">Select a learner to view subject progress and completion status.</p>
-      </section>
+  <div class="sidebar-overlay" id="sidebar-overlay"></div>
 
-      <section aria-labelledby="learners-heading">
-        <h2 id="learners-heading" class="section-title">Learners</h2>
-        <div id="learners-container" class="subject-grid">
-          <p class="status-message">Loading learners...</p>
-        </div>
-      </section>
+  <div class="app-layout">
+    <aside class="sidebar" id="tutor-sidebar" aria-label="Tutor sidebar">
+      <div class="sidebar-brand">
+        <a href="index.html" class="logo">GibJohn Learning</a>
+      </div>
+      <nav class="sidebar-nav" aria-label="Tutor navigation">
+        <a href="tutor_dashboard.html" class="active">My Students</a>
+        <a href="#" aria-disabled="true">Assignments</a>
+        <a href="#" aria-disabled="true">Analytics</a>
+      </nav>
+      <div class="sidebar-footer">
+        <a class="btn btn-primary" href="/gibjohn/api/auth/logout.php">Logout</a>
+      </div>
+    </aside>
+
+    <main class="main-content">
+      <div class="main-content-inner">
+        <section class="page-header" aria-labelledby="page-title">
+          <h1 id="page-title" class="page-title">Tutor Dashboard</h1>
+          <p class="page-subtitle">Monitor learner progress and open detailed progress reports.</p>
+        </section>
+
+        <section aria-labelledby="summary-heading">
+          <h2 id="summary-heading" class="section-title">Student Summary</h2>
+          <div id="summary-cards" class="card-grid summary-grid">
+            <article class="card summary-card">
+              <h3>Total Students</h3>
+              <p class="summary-value" id="summary-total">0</p>
+            </article>
+            <article class="card summary-card">
+              <h3>Average Progress</h3>
+              <p class="summary-value" id="summary-progress">0%</p>
+            </article>
+            <article class="card summary-card">
+              <h3>Total Completions</h3>
+              <p class="summary-value" id="summary-completed">0</p>
+            </article>
+          </div>
+        </section>
+
+        <section aria-labelledby="students-heading">
+          <h2 id="students-heading" class="section-title">Student Activity</h2>
+          <div id="students-table" class="student-table-wrap">
+            <div class="student-table-head" role="row">
+              <span>Student Name</span>
+              <span>Subject Progress %</span>
+              <span>Completion Count</span>
+              <span>Last Activity</span>
+              <span>Action</span>
+            </div>
+            <div id="students-table-body" class="student-table-body">
+              <p class="status-message">Loading learners...</p>
+            </div>
+          </div>
+        </section>
+      </div>
+
+          <footer class="site-footer">
+    <div class="footer-inner">
+      <div class="footer-brand">
+        <h3>GibJohn Tutoring</h3>
+        <p>Structured learning. Real progress.</p>
+      </div>
+
+      <div class="footer-links">
+        <a href="index.html" id="footer-home">Home</a>
+        <a href="learner_dashboard.html" id="footer-dashboard" hidden>Dashboard</a>
+        <a href="login.html" id="footer-login">Login</a>
+        <a href="register.html" id="footer-register">Register</a>
+        <a href="/gibjohn/api/auth/logout.php" id="footer-logout" hidden>Logout</a>
+      </div>
     </div>
-  </main>
 
-  <footer class="site-footer">
-    <div class="container">
-      <p>Gibjohn Tutoring</p>
+    <div class="footer-bottom">
+      © 2026 GibJohn Tutoring. All rights reserved.
     </div>
   </footer>
+    </main>
+  </div>
 
   <script>
-    const learnersContainer = document.querySelector("#learners-container");
+    const studentsTableBody = document.querySelector("#students-table-body");
+    const summaryTotal = document.querySelector("#summary-total");
+    const summaryProgress = document.querySelector("#summary-progress");
+    const summaryCompleted = document.querySelector("#summary-completed");
 
-    function showMessage(text, isError, isEmpty) {
-      learnersContainer.textContent = "";
+    function showTableMessage(text, isError, isEmpty) {
+      studentsTableBody.textContent = "";
       const paragraph = document.createElement("p");
       paragraph.className = isError ? "status-message error" : "status-message";
       paragraph.textContent = text;
@@ -58,7 +114,7 @@
         paragraph.className += " empty-state";
       }
 
-      learnersContainer.appendChild(paragraph);
+      studentsTableBody.appendChild(paragraph);
     }
 
     function parseJson(raw) {
@@ -81,97 +137,234 @@
       return [];
     }
 
-    function createLearnerCard(learner) {
-      const learnerId = learner && learner.id ? learner.id : null;
-      const learnerEmail = learner && learner.email ? learner.email : "Learner";
+    function summarizeSubjects(subjects) {
+      if (!Array.isArray(subjects)) {
+        return {
+          totalContent: 0,
+          completedContent: 0,
+          progressPercentage: 0,
+          lastActivity: "Not available"
+        };
+      }
 
-      const card = document.createElement("article");
-      card.className = "card subject-card";
+      const totalContent = subjects.reduce(function (sum, subject) {
+        return sum + Number(subject && subject.total_content ? subject.total_content : 0);
+      }, 0);
 
-      const title = document.createElement("h3");
-      title.textContent = learnerEmail;
+      const completedContent = subjects.reduce(function (sum, subject) {
+        return sum + Number(subject && subject.completed_content ? subject.completed_content : 0);
+      }, 0);
 
-      const description = document.createElement("p");
-      description.className = "subject-description";
-      description.textContent = "View subject completion and current progress.";
+      const progressPercentage = totalContent > 0
+        ? Math.round((completedContent / totalContent) * 100)
+        : 0;
 
-      const footer = document.createElement("div");
-      footer.className = "subject-footer";
+      return {
+        totalContent: totalContent,
+        completedContent: completedContent,
+        progressPercentage: progressPercentage,
+        lastActivity: completedContent > 0 ? "Recently active" : "No activity yet"
+      };
+    }
+
+    function createStudentRow(student) {
+      const row = document.createElement("article");
+      row.className = "student-row";
+
+      const nameCell = document.createElement("div");
+      nameCell.className = "student-cell student-name";
+      nameCell.setAttribute("data-label", "Student Name");
+      nameCell.textContent = student.email;
+
+      const progressCell = document.createElement("div");
+      progressCell.className = "student-cell";
+      progressCell.setAttribute("data-label", "Subject Progress %");
+      progressCell.textContent = student.progressPercentage + "%";
+
+      const completionCell = document.createElement("div");
+      completionCell.className = "student-cell";
+      completionCell.setAttribute("data-label", "Completion Count");
+      completionCell.textContent = student.completedContent + " / " + student.totalContent;
+
+      const lastActivityCell = document.createElement("div");
+      lastActivityCell.className = "student-cell";
+      lastActivityCell.setAttribute("data-label", "Last Activity");
+      lastActivityCell.textContent = student.lastActivity;
+
+      const actionCell = document.createElement("div");
+      actionCell.className = "student-cell student-action";
+      actionCell.setAttribute("data-label", "Action");
 
       const button = document.createElement("button");
       button.type = "button";
       button.className = "btn btn-primary";
       button.textContent = "View Progress";
+      button.addEventListener("click", function () {
+        window.location.href = "learner_progress.html?learner_id=" + encodeURIComponent(student.id);
+      });
 
-      if (learnerId === null || learnerId === undefined || learnerId === "") {
-        button.disabled = true;
-      } else {
-        button.addEventListener("click", function () {
-          window.location.href = "learner_progress.html?learner_id=" + encodeURIComponent(learnerId);
-        });
-      }
+      actionCell.appendChild(button);
 
-      footer.appendChild(button);
-      card.appendChild(title);
-      card.appendChild(description);
-      card.appendChild(footer);
+      row.appendChild(nameCell);
+      row.appendChild(progressCell);
+      row.appendChild(completionCell);
+      row.appendChild(lastActivityCell);
+      row.appendChild(actionCell);
 
-      return card;
+      return row;
     }
 
-    fetch("/gibjohn/api/tutor/get_learners.php")
-      .then(function (response) {
-        return response.text().then(function (raw) {
-          return {
-            response: response,
-            data: parseJson(raw)
-          };
-        });
-      })
-      .then(function (result) {
-        if (!result.response.ok || !result.data || result.data.error) {
-          throw new Error((result.data && result.data.error) ? result.data.error : "Unable to load learners.");
+    async function fetchLearnerProgress(learnerId) {
+      const response = await fetch("/gibjohn/api/tutor/get_learner_progress.php?learner_id=" + encodeURIComponent(learnerId));
+      const raw = await response.text();
+      const data = parseJson(raw);
+
+      if (!response.ok || !data || data.error) {
+        return summarizeSubjects([]);
+      }
+
+      return summarizeSubjects(data.subjects);
+    }
+
+    async function loadTutorDashboard() {
+      try {
+        const response = await fetch("/gibjohn/api/tutor/get_learners.php");
+        const raw = await response.text();
+        const data = parseJson(raw);
+
+        if (!response.ok || !data || data.error) {
+          throw new Error((data && data.error) ? data.error : "Unable to load learners.");
         }
 
-        const learners = getLearners(result.data);
+        const learners = getLearners(data);
 
         if (learners.length === 0) {
-          showMessage("No learners found.", false, true);
+          summaryTotal.textContent = "0";
+          summaryProgress.textContent = "0%";
+          summaryCompleted.textContent = "0";
+          showTableMessage("No learners found.", false, true);
           return;
         }
 
-        learnersContainer.textContent = "";
-        learners.forEach(function (learner) {
-          learnersContainer.appendChild(createLearnerCard(learner));
-        });
-      })
-      .catch(function (error) {
-        showMessage(error.message || "Unable to load learners right now.", true, false);
-      });
-  </script>
-  <script>
-    document.addEventListener("DOMContentLoaded", function () {
-      const hamburger = document.querySelector(".hamburger");
-      const navLinks = document.querySelector(".nav-links");
+        const learnersWithProgress = await Promise.all(
+          learners.map(async function (learner) {
+            const progress = await fetchLearnerProgress(learner.id);
+            return {
+              id: learner.id,
+              email: learner.email || "Learner",
+              progressPercentage: progress.progressPercentage,
+              completedContent: progress.completedContent,
+              totalContent: progress.totalContent,
+              lastActivity: progress.lastActivity
+            };
+          })
+        );
 
-      if (!hamburger || !navLinks) {
+        const totalProgress = learnersWithProgress.reduce(function (sum, learner) {
+          return sum + learner.progressPercentage;
+        }, 0);
+
+        const totalCompleted = learnersWithProgress.reduce(function (sum, learner) {
+          return sum + learner.completedContent;
+        }, 0);
+
+        summaryTotal.textContent = String(learnersWithProgress.length);
+        summaryProgress.textContent = Math.round(totalProgress / learnersWithProgress.length) + "%";
+        summaryCompleted.textContent = String(totalCompleted);
+
+        studentsTableBody.textContent = "";
+        learnersWithProgress.forEach(function (learner) {
+          studentsTableBody.appendChild(createStudentRow(learner));
+        });
+      } catch (error) {
+        showTableMessage(error.message || "Unable to load learners right now.", true, false);
+      }
+    }
+
+    loadTutorDashboard();
+
+    document.addEventListener("DOMContentLoaded", function () {
+      const hamburger = document.querySelector(".mobile-topbar .hamburger");
+      const sidebar = document.querySelector(".sidebar");
+      const overlay = document.querySelector("#sidebar-overlay");
+
+      function closeSidebar() {
+        if (!hamburger || !sidebar || !overlay) {
+          return;
+        }
+
+        sidebar.classList.remove("is-open");
+        overlay.classList.remove("is-visible");
+        hamburger.classList.remove("is-open");
+        hamburger.setAttribute("aria-expanded", "false");
+        document.body.classList.remove("menu-open");
+      }
+
+      if (!hamburger || !sidebar || !overlay) {
         return;
       }
 
       hamburger.addEventListener("click", function () {
-        const isOpen = navLinks.classList.toggle("is-open");
+        const isOpen = sidebar.classList.toggle("is-open");
+        overlay.classList.toggle("is-visible", isOpen);
         hamburger.classList.toggle("is-open", isOpen);
         hamburger.setAttribute("aria-expanded", isOpen ? "true" : "false");
+        document.body.classList.toggle("menu-open", isOpen);
       });
 
-      navLinks.querySelectorAll("a").forEach(function (link) {
+      overlay.addEventListener("click", closeSidebar);
+
+      document.querySelectorAll(".sidebar-nav a, .sidebar-footer a").forEach(function (link) {
         link.addEventListener("click", function () {
-          navLinks.classList.remove("is-open");
-          hamburger.classList.remove("is-open");
-          hamburger.setAttribute("aria-expanded", "false");
+          closeSidebar();
         });
       });
     });
+  </script>
+  <script>
+    (function footerAuthToggle() {
+      const footerDashboard = document.querySelector("#footer-dashboard");
+      const footerLogin = document.querySelector("#footer-login");
+      const footerRegister = document.querySelector("#footer-register");
+      const footerLogout = document.querySelector("#footer-logout");
+
+      if (!footerDashboard || !footerLogin || !footerRegister || !footerLogout) {
+        return;
+      }
+
+      function getDashboardPath(role) {
+        if (role === "tutor") {
+          return "tutor_dashboard.html";
+        }
+
+        return "learner_dashboard.html";
+      }
+
+      fetch("/gibjohn/api/auth/me.php")
+        .then(function (response) {
+          return response.json();
+        })
+        .then(function (data) {
+          if (data && data.success === true && data.logged_in === true) {
+            footerDashboard.hidden = false;
+            footerLogout.hidden = false;
+            footerLogin.hidden = true;
+            footerRegister.hidden = true;
+            footerDashboard.setAttribute("href", getDashboardPath(data.role));
+          } else {
+            footerDashboard.hidden = true;
+            footerLogout.hidden = true;
+            footerLogin.hidden = false;
+            footerRegister.hidden = false;
+          }
+        })
+        .catch(function () {
+          footerDashboard.hidden = true;
+          footerLogout.hidden = true;
+          footerLogin.hidden = false;
+          footerRegister.hidden = false;
+        });
+    })();
   </script>
 </body>
 </html>

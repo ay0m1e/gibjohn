@@ -67,75 +67,109 @@ try {
 
     $newReward = null;
     try {
-        try {
-            $checkRewardStmt = $pdo->prepare(
+        $rewardExists = function ($badgeName) use ($pdo, $learnerId) {
+            $queries = [
                 "SELECT id
                 FROM rewards
                 WHERE learner_id = :learner_id
-                  AND (
-                      badge_name = :badge_name
-                      OR reward_type = :badge_name
-                  )
-                LIMIT 1"
-            );
-        } catch (PDOException $checkWithTypeError) {
-            $checkRewardStmt = $pdo->prepare(
+                  AND (badge_name = :badge_name OR reward_type = :badge_name)
+                LIMIT 1",
                 "SELECT id
                 FROM rewards
                 WHERE learner_id = :learner_id
                   AND badge_name = :badge_name
+                LIMIT 1",
+                "SELECT id
+                FROM rewards
+                WHERE learner_id = :learner_id
+                  AND reward_type = :badge_name
                 LIMIT 1"
-            );
-        }
+            ];
 
-        $insertRewardWithTypeStmt = $pdo->prepare(
-            "INSERT INTO rewards (learner_id, badge_name, reward_type)
-            VALUES (:learner_id, :badge_name, 'badge')"
-        );
-        $insertRewardBasicStmt = $pdo->prepare(
-            "INSERT INTO rewards (learner_id, badge_name)
-            VALUES (:learner_id, :badge_name)"
-        );
-
-        foreach ($milestones as $threshold => $badgeName) {
-            if ($totalCompleted >= $threshold) {
-                $checkRewardStmt->execute([
-                    'learner_id' => $learnerId,
-                    'badge_name' => $badgeName
-                ]);
-
-                if (!$checkRewardStmt->fetch()) {
-                    $params = [
+            foreach ($queries as $query) {
+                try {
+                    $stmt = $pdo->prepare($query);
+                    $stmt->execute([
                         'learner_id' => $learnerId,
                         'badge_name' => $badgeName
-                    ];
+                    ]);
 
-                    try {
-                        $insertRewardWithTypeStmt->execute([
-                            'learner_id' => $learnerId,
-                            'badge_name' => $badgeName
-                        ]);
-                    } catch (PDOException $insertWithTypeError) {
-                        try {
-                            $fallbackWithTypeStmt = $pdo->prepare(
-                                "INSERT INTO rewards (learner_id, badge_name, reward_type)
-                                VALUES (:learner_id, :badge_name, :reward_type)"
-                            );
-                            $fallbackWithTypeStmt->execute([
-                                'learner_id' => $learnerId,
-                                'badge_name' => $badgeName,
-                                'reward_type' => $badgeName
-                            ]);
-                        } catch (PDOException $fallbackWithTypeError) {
-                            $insertRewardBasicStmt->execute($params);
-                        }
+                    if ($stmt->fetch()) {
+                        return true;
                     }
-
-                    $newReward = $badgeName;
+                } catch (PDOException $ignored) {
+                    // Try the next compatible query shape.
                 }
             }
+
+            return false;
+        };
+
+        $tryInsertReward = function ($badgeName) use ($pdo, $learnerId) {
+            $insertAttempts = [
+                [
+                    'sql' => "INSERT INTO rewards (learner_id, badge_name, reward_type)
+                              VALUES (:learner_id, :badge_name, :reward_type)",
+                    'params' => [
+                        'learner_id' => $learnerId,
+                        'badge_name' => $badgeName,
+                        'reward_type' => 'badge'
+                    ]
+                ],
+                [
+                    'sql' => "INSERT INTO rewards (learner_id, badge_name, reward_type)
+                              VALUES (:learner_id, :badge_name, :reward_type)",
+                    'params' => [
+                        'learner_id' => $learnerId,
+                        'badge_name' => $badgeName,
+                        'reward_type' => $badgeName
+                    ]
+                ],
+                [
+                    'sql' => "INSERT INTO rewards (learner_id, badge_name)
+                              VALUES (:learner_id, :badge_name)",
+                    'params' => [
+                        'learner_id' => $learnerId,
+                        'badge_name' => $badgeName
+                    ]
+                ],
+                [
+                    'sql' => "INSERT INTO rewards (learner_id, reward_type)
+                              VALUES (:learner_id, :reward_type)",
+                    'params' => [
+                        'learner_id' => $learnerId,
+                        'reward_type' => $badgeName
+                    ]
+                ]
+            ];
+
+            foreach ($insertAttempts as $attempt) {
+                try {
+                    $stmt = $pdo->prepare($attempt['sql']);
+                    $stmt->execute($attempt['params']);
+                    return;
+                } catch (PDOException $ignored) {
+                    // Try the next compatible insert shape.
+                }
+            }
+        };
+
+        foreach ($milestones as $threshold => $badgeName) {
+            if ($totalCompleted < $threshold) {
+                continue;
+            }
+
+            if ($rewardExists($badgeName)) {
+                continue;
+            }
+
+            $tryInsertReward($badgeName);
+
+            if ($rewardExists($badgeName)) {
+                $newReward = $badgeName;
+            }
         }
-    } catch (PDOException $rewardException) {
+    } catch (PDOException $rewardError) {
         $newReward = null;
     }
 

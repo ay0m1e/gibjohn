@@ -17,8 +17,10 @@
       </button>
       <nav class="nav-links">
         <a href="index.html">Home</a>
-        <a href="register.html">Get Started</a>
-        <a href="login.html">Login</a>
+        <a href="register.html" id="nav-register">Get Started</a>
+        <a href="login.html" id="nav-login">Login</a>
+        <a href="learner_dashboard.html" id="nav-dashboard" hidden>Dashboard</a>
+        <a href="/gibjohn/api/auth/logout.php" id="nav-logout" hidden>Logout</a>
       </nav>
     </div>
   </header>
@@ -33,14 +35,20 @@
               <p class="page-subtitle">
                 Build strong learning habits with focused lessons, visible growth, and clear next steps every day.
               </p>
-              <div class="cta-group">
+              <div class="cta-group" id="logged-out-actions">
                 <a href="register.html" class="btn btn-primary">Get Started</a>
                 <a href="login.html" class="btn btn-primary">Login</a>
               </div>
+              <div class="cta-group" id="logged-in-actions" style="display:none;">
+                <a href="learner_dashboard.html" class="btn btn-primary" id="dashboard-cta">Go to Dashboard</a>
+                <a href="/gibjohn/api/auth/logout.php" class="btn btn-primary">Logout</a>
+              </div>
             </div>
-            <div class="image-placeholder hero-image" role="img" aria-label="Hero learning illustration">
-              Hero Illustration
-            </div>
+            <img
+              src="../assets/media/hero_img.jpg"
+              class="hero-media"
+              alt="Learner studying with educational materials"
+            >
           </div>
         </article>
       </div>
@@ -51,21 +59,41 @@
         <h2 id="how-it-works-title" class="section-title">How It Works</h2>
         <div class="homepage-grid steps-grid">
           <article class="card step-card">
-            <div class="image-placeholder small-icon" role="img" aria-label="Step one visual">1</div>
+            <div class="how-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="12" cy="8" r="3.25" stroke="currentColor" stroke-width="1.8"/>
+                <path d="M5.5 19.5C6.7 15.8 9.1 14 12 14C14.9 14 17.3 15.8 18.5 19.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+              </svg>
+            </div>
             <h3>1. Start Your Path</h3>
             <p class="subject-description">
               Create your learner account and choose the subjects you want to improve first.
             </p>
           </article>
           <article class="card step-card">
-            <div class="image-placeholder small-icon" role="img" aria-label="Step two visual">2</div>
+            <div class="how-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M4.5 7.5L6.5 9.5L9.5 6.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M11.5 8H19.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+                <path d="M4.5 12L6.5 14L9.5 11" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M11.5 12.5H19.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+                <path d="M4.5 16.5L6.5 18.5L9.5 15.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M11.5 17H19.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+              </svg>
+            </div>
             <h3>2. Learn in Steps</h3>
             <p class="subject-description">
               Complete structured activities one by one with a clear order and practical pacing.
             </p>
           </article>
           <article class="card step-card">
-            <div class="image-placeholder small-icon" role="img" aria-label="Step three visual">3</div>
+            <div class="how-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M4 18.5H20" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+                <path d="M6 15L10 11L13 14L18 9" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M15.5 9H18V11.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </div>
             <h3>3. Track Results</h3>
             <p class="subject-description">
               Watch your progress update in real time so you always know what to do next.
@@ -117,8 +145,42 @@
           <p class="progress-text">Current XP: 680 / 1000</p>
           <progress class="progress-meter progress-meter-large" max="1000" value="680" aria-label="XP progress"></progress>
           <p class="subject-description">Next milestone: 1,000 XP unlocks your next achievement badge.</p>
-          <div class="image-placeholder gamification-image" role="img" aria-label="Gamification preview">
-            XP Preview
+          <div class="milestone-ladder">
+            <article class="card milestone-card is-unlocked">
+              <div class="milestone-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <circle cx="12" cy="10" r="5" stroke="currentColor" stroke-width="1.8"></circle>
+                  <path d="M9.6 14.4L8.5 20L12 17.7L15.5 20L14.4 14.4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path>
+                </svg>
+              </div>
+              <h3>Starter Badge</h3>
+              <p class="milestone-requirement">Complete 5 activities</p>
+              <p class="milestone-status">Unlocked</p>
+            </article>
+            <article class="card milestone-card is-locked">
+              <div class="milestone-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <circle cx="12" cy="10" r="5" stroke="currentColor" stroke-width="1.8"></circle>
+                  <path d="M10 8.9L11.4 10.3L14 7.7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path>
+                  <path d="M9.6 14.4L8.5 20L12 17.7L15.5 20L14.4 14.4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path>
+                </svg>
+              </div>
+              <h3>Momentum Badge</h3>
+              <p class="milestone-requirement">Complete 10 activities</p>
+              <p class="milestone-status">Locked</p>
+            </article>
+            <article class="card milestone-card is-locked">
+              <div class="milestone-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <circle cx="12" cy="10" r="5" stroke="currentColor" stroke-width="1.8"></circle>
+                  <path d="M9.2 11L11.2 12.8L14.8 8.8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path>
+                  <path d="M9.6 14.4L8.5 20L12 17.7L15.5 20L14.4 14.4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path>
+                </svg>
+              </div>
+              <h3>Committed Learner</h3>
+              <p class="milestone-requirement">Complete 20 activities</p>
+              <p class="milestone-status">Locked</p>
+            </article>
           </div>
         </article>
       </div>
@@ -133,9 +195,11 @@
               Every learner journey remains visible to tutors, enabling timely check-ins, focused guidance, and better long-term outcomes.
             </p>
           </article>
-          <div class="image-placeholder tutor-image" role="img" aria-label="Tutor dashboard preview">
-            Tutor Dashboard Preview
-          </div>
+          <img
+            src="../assets/media/tutor_dash.png"
+            class="hero-media tutor-image"
+            alt="Tutor dashboard preview"
+          >
         </div>
       </div>
     </section>
@@ -155,15 +219,45 @@
     </section>
   </main>
 
-  <footer class="site-footer">
-    <div class="container">
-      <p>Gibjohn Tutoring</p>
+      <footer class="site-footer">
+    <div class="footer-inner">
+      <div class="footer-brand">
+        <h3>GibJohn Tutoring</h3>
+        <p>Structured learning. Real progress.</p>
+      </div>
+
+      <div class="footer-links">
+        <a href="index.html" id="footer-home">Home</a>
+        <a href="learner_dashboard.html" id="footer-dashboard" hidden>Dashboard</a>
+        <a href="login.html" id="footer-login">Login</a>
+        <a href="register.html" id="footer-register">Register</a>
+        <a href="/gibjohn/api/auth/logout.php" id="footer-logout" hidden>Logout</a>
+      </div>
+    </div>
+
+    <div class="footer-bottom">
+      © 2026 GibJohn Tutoring. All rights reserved.
     </div>
   </footer>
   <script>
     document.addEventListener("DOMContentLoaded", function () {
       const hamburger = document.querySelector(".hamburger");
       const navLinks = document.querySelector(".nav-links");
+      const loggedOutActions = document.querySelector("#logged-out-actions");
+      const loggedInActions = document.querySelector("#logged-in-actions");
+      const dashboardCta = document.querySelector("#dashboard-cta");
+      const navRegister = document.querySelector("#nav-register");
+      const navLogin = document.querySelector("#nav-login");
+      const navDashboard = document.querySelector("#nav-dashboard");
+      const navLogout = document.querySelector("#nav-logout");
+
+      function getDashboardPath(role) {
+        if (role === "tutor") {
+          return "tutor_dashboard.html";
+        }
+
+        return "learner_dashboard.html";
+      }
 
       if (!hamburger || !navLinks) {
         return;
@@ -182,7 +276,96 @@
           hamburger.setAttribute("aria-expanded", "false");
         });
       });
+
+      fetch("/gibjohn/api/auth/me.php")
+        .then(function (response) {
+          return response.json();
+        })
+        .then(function (data) {
+          if (data && data.success === true && data.logged_in === true) {
+            const dashboardPath = getDashboardPath(data.role);
+
+            if (loggedOutActions && loggedInActions && dashboardCta) {
+              loggedOutActions.style.display = "none";
+              loggedInActions.style.display = "";
+              dashboardCta.setAttribute("href", dashboardPath);
+            }
+
+            if (navRegister && navLogin && navDashboard && navLogout) {
+              navRegister.hidden = true;
+              navLogin.hidden = true;
+              navDashboard.hidden = false;
+              navLogout.hidden = false;
+              navDashboard.setAttribute("href", dashboardPath);
+            }
+          } else {
+            if (loggedOutActions && loggedInActions) {
+              loggedOutActions.style.display = "";
+              loggedInActions.style.display = "none";
+            }
+
+            if (navRegister && navLogin && navDashboard && navLogout) {
+              navRegister.hidden = false;
+              navLogin.hidden = false;
+              navDashboard.hidden = true;
+              navLogout.hidden = true;
+            }
+          }
+        })
+        .catch(function () {
+          if (loggedOutActions && loggedInActions) {
+            loggedOutActions.style.display = "";
+            loggedInActions.style.display = "none";
+          }
+
+          return;
+        });
     });
+  </script>
+  <script>
+    (function footerAuthToggle() {
+      const footerDashboard = document.querySelector("#footer-dashboard");
+      const footerLogin = document.querySelector("#footer-login");
+      const footerRegister = document.querySelector("#footer-register");
+      const footerLogout = document.querySelector("#footer-logout");
+
+      if (!footerDashboard || !footerLogin || !footerRegister || !footerLogout) {
+        return;
+      }
+
+      function getDashboardPath(role) {
+        if (role === "tutor") {
+          return "tutor_dashboard.html";
+        }
+
+        return "learner_dashboard.html";
+      }
+
+      fetch("/gibjohn/api/auth/me.php")
+        .then(function (response) {
+          return response.json();
+        })
+        .then(function (data) {
+          if (data && data.success === true && data.logged_in === true) {
+            footerDashboard.hidden = false;
+            footerLogout.hidden = false;
+            footerLogin.hidden = true;
+            footerRegister.hidden = true;
+            footerDashboard.setAttribute("href", getDashboardPath(data.role));
+          } else {
+            footerDashboard.hidden = true;
+            footerLogout.hidden = true;
+            footerLogin.hidden = false;
+            footerRegister.hidden = false;
+          }
+        })
+        .catch(function () {
+          footerDashboard.hidden = true;
+          footerLogout.hidden = true;
+          footerLogin.hidden = false;
+          footerRegister.hidden = false;
+        });
+    })();
   </script>
 </body>
 </html>

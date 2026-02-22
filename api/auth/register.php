@@ -1,5 +1,4 @@
 <?php
-// Handles user registration requests.
 session_start();
 require __DIR__ . '/../core/db.php';
 

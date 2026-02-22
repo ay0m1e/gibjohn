@@ -6,47 +6,118 @@
   <title>Learner Dashboard</title>
   <link rel="stylesheet" href="../assets/css/layout.css">
 </head>
-<body>
-  <header class="site-header">
-    <div class="container header-inner">
-      <a href="index.html" class="logo">GibJohn Learning</a>
-      <button class="hamburger" type="button" aria-label="Toggle navigation" aria-expanded="false">
-        <span></span>
-        <span></span>
-        <span></span>
-      </button>
-      <nav class="nav-links">
-        <a href="learner_dashboard.html">Dashboard</a>
-        <a href="profile.html">Profile</a>
-        <a href="/gibjohn/api/auth/logout.php">Logout</a>
-      </nav>
-    </div>
+<body class="app-shell">
+  <header class="mobile-topbar" aria-label="Mobile navigation bar">
+    <button class="hamburger" type="button" aria-label="Toggle sidebar" aria-expanded="false" aria-controls="learner-sidebar">
+      <span></span>
+      <span></span>
+      <span></span>
+    </button>
+    <a href="index.html" class="logo">GibJohn Learning</a>
   </header>
 
-  <main>
-    <div class="container">
-      <section class="page-header" aria-labelledby="page-title">
-        <h1 id="page-title" class="page-title">Learner Dashboard</h1>
-        <p class="page-subtitle">Pick up where you left off and keep your streak moving forward.</p>
-      </section>
+  <div class="sidebar-overlay" id="sidebar-overlay"></div>
 
-      <section aria-labelledby="subjects-heading">
-        <h2 id="subjects-heading" class="section-title">Your Subjects</h2>
-        <div id="subjects-container" class="subject-grid">
-          <p class="status-message">Loading subjects...</p>
-        </div>
-      </section>
+  <div class="app-layout">
+    <aside class="sidebar" id="learner-sidebar" aria-label="Learner sidebar">
+      <div class="sidebar-brand">
+        <a href="index.html" class="logo">GibJohn Learning</a>
+      </div>
+      <nav class="sidebar-nav" aria-label="Learner navigation">
+        <a href="learner_dashboard.html" class="active">Dashboard</a>
+        <a href="#activity-overview">Progress</a>
+        <a href="profile.html">Profile</a>
+        <a href="#" aria-disabled="true">Settings</a>
+      </nav>
+      <div class="sidebar-footer">
+        <a class="btn btn-primary" href="/gibjohn/api/auth/logout.php">Logout</a>
+      </div>
+    </aside>
+
+    <main class="main-content">
+      <div class="main-content-inner">
+        <section class="page-header" aria-labelledby="page-title">
+          <h1 id="page-title" class="page-title">Learner Dashboard</h1>
+          <p class="page-subtitle">Track each subject and continue your learning journey.</p>
+        </section>
+
+        <section aria-labelledby="subjects-heading">
+          <h2 id="subjects-heading" class="section-title">Your Subjects</h2>
+          <div id="subjects-container" class="card-grid subject-card-grid">
+            <p class="status-message">Loading subjects...</p>
+          </div>
+        </section>
+
+        <section id="activity-overview" class="activity-section" aria-labelledby="activity-heading">
+          <h2 id="activity-heading" class="section-title">Activity Overview</h2>
+          <div class="milestone-ladder" id="milestone-ladder">
+            <article class="card milestone-card is-locked" data-threshold="5" data-badge-name="Starter Badge">
+              <div class="milestone-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <circle cx="12" cy="10" r="5" stroke="currentColor" stroke-width="1.8"></circle>
+                  <path d="M9.6 14.4L8.5 20L12 17.7L15.5 20L14.4 14.4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path>
+                </svg>
+              </div>
+              <h3>Starter Badge</h3>
+              <p class="milestone-requirement">Complete 5 activities</p>
+              <p class="milestone-status">Locked</p>
+            </article>
+
+            <article class="card milestone-card is-locked" data-threshold="10" data-badge-name="Momentum Badge">
+              <div class="milestone-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <circle cx="12" cy="10" r="5" stroke="currentColor" stroke-width="1.8"></circle>
+                  <path d="M10 8.9L11.4 10.3L14 7.7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path>
+                  <path d="M9.6 14.4L8.5 20L12 17.7L15.5 20L14.4 14.4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path>
+                </svg>
+              </div>
+              <h3>Momentum Badge</h3>
+              <p class="milestone-requirement">Complete 10 activities</p>
+              <p class="milestone-status">Locked</p>
+            </article>
+
+            <article class="card milestone-card is-locked" data-threshold="20" data-badge-name="Committed Learner">
+              <div class="milestone-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <circle cx="12" cy="10" r="5" stroke="currentColor" stroke-width="1.8"></circle>
+                  <path d="M9.2 11L11.2 12.8L14.8 8.8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path>
+                  <path d="M9.6 14.4L8.5 20L12 17.7L15.5 20L14.4 14.4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path>
+                </svg>
+              </div>
+              <h3>Committed Learner</h3>
+              <p class="milestone-requirement">Complete 20 activities</p>
+              <p class="milestone-status">Locked</p>
+            </article>
+          </div>
+        </section>
+      </div>
+
+          <footer class="site-footer">
+    <div class="footer-inner">
+      <div class="footer-brand">
+        <h3>GibJohn Tutoring</h3>
+        <p>Structured learning. Real progress.</p>
+      </div>
+
+      <div class="footer-links">
+        <a href="index.html" id="footer-home">Home</a>
+        <a href="learner_dashboard.html" id="footer-dashboard" hidden>Dashboard</a>
+        <a href="login.html" id="footer-login">Login</a>
+        <a href="register.html" id="footer-register">Register</a>
+        <a href="/gibjohn/api/auth/logout.php" id="footer-logout" hidden>Logout</a>
+      </div>
     </div>
-  </main>
 
-  <footer class="site-footer">
-    <div class="container">
-      <p>Gibjohn Tutoring</p>
+    <div class="footer-bottom">
+      © 2026 GibJohn Tutoring. All rights reserved.
     </div>
   </footer>
+    </main>
+  </div>
 
   <script>
     const subjectsContainer = document.querySelector("#subjects-container");
+    const milestoneLadder = document.querySelector("#milestone-ladder");
 
     function showMessage(message, isError, isEmpty) {
       subjectsContainer.textContent = "";
@@ -71,6 +142,63 @@
       }
 
       return [];
+    }
+
+    function normalizeRewards(data) {
+      if (data && Array.isArray(data.rewards)) {
+        return data.rewards;
+      }
+
+      return [];
+    }
+
+    function getRewardName(reward) {
+      if (!reward || typeof reward !== "object") {
+        return "";
+      }
+
+      if (typeof reward.badge_name === "string") {
+        return reward.badge_name.trim();
+      }
+
+      if (typeof reward.name === "string") {
+        return reward.name.trim();
+      }
+
+      if (typeof reward.reward_type === "string") {
+        return reward.reward_type.trim();
+      }
+
+      return "";
+    }
+
+    function updateMilestones(subjects, rewards) {
+      if (!milestoneLadder) {
+        return;
+      }
+
+      const totalCompleted = (Array.isArray(subjects) ? subjects : []).reduce(function (sum, subject) {
+        return sum + Number(subject && subject.completed_content ? subject.completed_content : 0);
+      }, 0);
+
+      const rewardNames = new Set((Array.isArray(rewards) ? rewards : []).map(function (reward) {
+        return getRewardName(reward);
+      }));
+
+      milestoneLadder.querySelectorAll(".milestone-card").forEach(function (card) {
+        const threshold = Number(card.getAttribute("data-threshold") || 0);
+        const badgeName = card.getAttribute("data-badge-name") || "";
+        const hasReward = rewardNames.has(badgeName);
+        const isUnlocked = hasReward || totalCompleted >= threshold;
+        const statusText = card.querySelector(".milestone-status");
+
+        card.classList.toggle("is-unlocked", isUnlocked);
+        card.classList.toggle("is-locked", !isUnlocked);
+
+        if (statusText) {
+          statusText.textContent = isUnlocked ? "Unlocked" : "Locked";
+        }
+      });
     }
 
     function clampProgress(value) {
@@ -101,23 +229,20 @@
       description.className = "subject-description";
       description.textContent = subjectDescription;
 
-      const footer = document.createElement("div");
-      footer.className = "subject-footer";
-
-      const progressText = document.createElement("p");
-      progressText.className = "progress-text";
-      progressText.textContent = completedContent + " / " + totalContent + " completed";
+      const metadata = document.createElement("p");
+      metadata.className = "subject-meta";
+      metadata.textContent = completedContent + " / " + totalContent + " completed";
 
       const progressBar = document.createElement("progress");
       progressBar.className = "progress-meter";
       progressBar.max = 100;
       progressBar.value = progressPercentage;
-      progressBar.setAttribute("aria-label", "Progress");
+      progressBar.setAttribute("aria-label", subjectName + " progress");
 
       const button = document.createElement("button");
       button.type = "button";
       button.className = "btn btn-primary";
-      button.textContent = "Continue";
+      button.textContent = "Continue Learning";
 
       if (subjectId === null || subjectId === undefined || subjectId === "") {
         button.disabled = true;
@@ -127,13 +252,11 @@
         });
       }
 
-      footer.appendChild(progressText);
-      footer.appendChild(progressBar);
-      footer.appendChild(button);
-
       card.appendChild(title);
       card.appendChild(description);
-      card.appendChild(footer);
+      card.appendChild(metadata);
+      card.appendChild(progressBar);
+      card.appendChild(button);
 
       return card;
     }
@@ -158,6 +281,8 @@
         }
 
         const subjects = normalizeSubjects(result.data);
+        const rewards = normalizeRewards(result.data);
+        updateMilestones(subjects, rewards);
 
         if (subjects.length === 0) {
           showMessage("No subjects available yet. New lessons will appear here soon.", false, true);
@@ -166,37 +291,96 @@
 
         subjectsContainer.textContent = "";
         subjects.forEach(function (subject) {
-          const card = createSubjectCard(subject);
-          subjectsContainer.appendChild(card);
+          subjectsContainer.appendChild(createSubjectCard(subject));
         });
       })
       .catch(function (error) {
+        updateMilestones([], []);
         showMessage(error.message || "Unable to load subjects right now.", true, false);
       });
-  </script>
-  <script>
-    document.addEventListener("DOMContentLoaded", function () {
-      const hamburger = document.querySelector(".hamburger");
-      const navLinks = document.querySelector(".nav-links");
 
-      if (!hamburger || !navLinks) {
+    document.addEventListener("DOMContentLoaded", function () {
+      const hamburger = document.querySelector(".mobile-topbar .hamburger");
+      const sidebar = document.querySelector(".sidebar");
+      const overlay = document.querySelector("#sidebar-overlay");
+
+      function closeSidebar() {
+        if (!hamburger || !sidebar || !overlay) {
+          return;
+        }
+
+        sidebar.classList.remove("is-open");
+        overlay.classList.remove("is-visible");
+        hamburger.classList.remove("is-open");
+        hamburger.setAttribute("aria-expanded", "false");
+        document.body.classList.remove("menu-open");
+      }
+
+      if (!hamburger || !sidebar || !overlay) {
         return;
       }
 
       hamburger.addEventListener("click", function () {
-        const isOpen = navLinks.classList.toggle("is-open");
+        const isOpen = sidebar.classList.toggle("is-open");
+        overlay.classList.toggle("is-visible", isOpen);
         hamburger.classList.toggle("is-open", isOpen);
         hamburger.setAttribute("aria-expanded", isOpen ? "true" : "false");
+        document.body.classList.toggle("menu-open", isOpen);
       });
 
-      navLinks.querySelectorAll("a").forEach(function (link) {
+      overlay.addEventListener("click", closeSidebar);
+
+      document.querySelectorAll(".sidebar-nav a, .sidebar-footer a").forEach(function (link) {
         link.addEventListener("click", function () {
-          navLinks.classList.remove("is-open");
-          hamburger.classList.remove("is-open");
-          hamburger.setAttribute("aria-expanded", "false");
+          closeSidebar();
         });
       });
     });
+  </script>
+  <script>
+    (function footerAuthToggle() {
+      const footerDashboard = document.querySelector("#footer-dashboard");
+      const footerLogin = document.querySelector("#footer-login");
+      const footerRegister = document.querySelector("#footer-register");
+      const footerLogout = document.querySelector("#footer-logout");
+
+      if (!footerDashboard || !footerLogin || !footerRegister || !footerLogout) {
+        return;
+      }
+
+      function getDashboardPath(role) {
+        if (role === "tutor") {
+          return "tutor_dashboard.html";
+        }
+
+        return "learner_dashboard.html";
+      }
+
+      fetch("/gibjohn/api/auth/me.php")
+        .then(function (response) {
+          return response.json();
+        })
+        .then(function (data) {
+          if (data && data.success === true && data.logged_in === true) {
+            footerDashboard.hidden = false;
+            footerLogout.hidden = false;
+            footerLogin.hidden = true;
+            footerRegister.hidden = true;
+            footerDashboard.setAttribute("href", getDashboardPath(data.role));
+          } else {
+            footerDashboard.hidden = true;
+            footerLogout.hidden = true;
+            footerLogin.hidden = false;
+            footerRegister.hidden = false;
+          }
+        })
+        .catch(function () {
+          footerDashboard.hidden = true;
+          footerLogout.hidden = true;
+          footerLogin.hidden = false;
+          footerRegister.hidden = false;
+        });
+    })();
   </script>
 </body>
 </html>

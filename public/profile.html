@@ -6,58 +6,85 @@
   <title>Learner Profile</title>
   <link rel="stylesheet" href="../assets/css/layout.css">
 </head>
-<body class="profile-page">
-  <header class="site-header">
-    <div class="container header-inner">
-      <a href="index.html" class="logo">GibJohn Learning</a>
-      <button class="hamburger" type="button" aria-label="Toggle navigation" aria-expanded="false">
-        <span></span>
-        <span></span>
-        <span></span>
-      </button>
-      <nav class="nav-links">
-        <a href="learner_dashboard.html">Dashboard</a>
-        <a href="profile.html">Profile</a>
-        <a href="/gibjohn/api/auth/logout.php">Logout</a>
-      </nav>
-    </div>
+<body class="profile-page app-shell">
+  <header class="mobile-topbar" aria-label="Mobile navigation bar">
+    <button class="hamburger" type="button" aria-label="Toggle sidebar" aria-expanded="false" aria-controls="learner-sidebar">
+      <span></span>
+      <span></span>
+      <span></span>
+    </button>
+    <a href="index.html" class="logo">GibJohn Learning</a>
   </header>
 
-  <main>
-    <div class="container">
-      <section class="page-header" aria-labelledby="profile-title">
-        <h1 id="profile-title" class="page-title">Learner Profile</h1>
-        <p class="page-subtitle">Review your account details, total completed activities, and earned rewards.</p>
-      </section>
+  <div class="sidebar-overlay" id="sidebar-overlay"></div>
 
-      <section class="profile-section" aria-labelledby="summary-heading">
-        <h2 id="summary-heading" class="section-title">Account Summary</h2>
-        <div class="subject-grid profile-summary-grid">
-          <article class="card">
-            <h3>Email</h3>
-            <p id="profile-email" class="subject-description">Loading...</p>
-          </article>
-          <article class="card">
-            <h3>Total Completed</h3>
-            <p id="total-completed" class="subject-description">Loading...</p>
-          </article>
-        </div>
-      </section>
+  <div class="app-layout">
+    <aside class="sidebar" id="learner-sidebar" aria-label="Learner sidebar">
+      <div class="sidebar-brand">
+        <a href="index.html" class="logo">GibJohn Learning</a>
+      </div>
+      <nav class="sidebar-nav" aria-label="Learner navigation">
+        <a href="learner_dashboard.html">Dashboard</a>
+        <a href="learner_dashboard.html#activity-overview">Progress</a>
+        <a href="profile.html" class="active">Profile</a>
+        <a href="#" aria-disabled="true">Settings</a>
+      </nav>
+      <div class="sidebar-footer">
+        <a class="btn btn-primary" href="/gibjohn/api/auth/logout.php">Logout</a>
+      </div>
+    </aside>
 
-      <section class="profile-section" aria-labelledby="rewards-heading">
-        <h2 id="rewards-heading" class="section-title">Rewards</h2>
-        <div id="rewards-container" class="subject-grid rewards-grid">
-          <p class="status-message">Loading rewards...</p>
-        </div>
-      </section>
+    <main class="main-content">
+      <div class="main-content-inner">
+        <section class="page-header profile-header card" aria-labelledby="profile-title">
+          <h1 id="profile-title" class="page-title">Learner Profile</h1>
+          <p class="page-subtitle">Review your account details, total completed activities, and earned rewards.</p>
+        </section>
+
+        <section class="profile-section" aria-labelledby="summary-heading">
+          <h2 id="summary-heading" class="section-title">Account Summary</h2>
+          <div class="card-grid summary-grid profile-summary-grid">
+            <article class="card profile-stat-card">
+              <p class="profile-stat-label">Email</p>
+              <p id="profile-email" class="profile-stat-value profile-email-value">Loading...</p>
+            </article>
+            <article class="card profile-stat-card">
+              <p class="profile-stat-label">Total Completed</p>
+              <p id="total-completed" class="profile-stat-value profile-number-value">Loading...</p>
+            </article>
+          </div>
+        </section>
+
+        <section class="profile-section" aria-labelledby="rewards-heading">
+          <h2 id="rewards-heading" class="section-title">Rewards</h2>
+          <div id="rewards-container" class="card-grid rewards-grid">
+            <p class="status-message">Loading rewards...</p>
+          </div>
+        </section>
+      </div>
+
+          <footer class="site-footer">
+    <div class="footer-inner">
+      <div class="footer-brand">
+        <h3>GibJohn Tutoring</h3>
+        <p>Structured learning. Real progress.</p>
+      </div>
+
+      <div class="footer-links">
+        <a href="index.html" id="footer-home">Home</a>
+        <a href="learner_dashboard.html" id="footer-dashboard" hidden>Dashboard</a>
+        <a href="login.html" id="footer-login">Login</a>
+        <a href="register.html" id="footer-register">Register</a>
+        <a href="/gibjohn/api/auth/logout.php" id="footer-logout" hidden>Logout</a>
+      </div>
     </div>
-  </main>
 
-  <footer class="site-footer">
-    <div class="container">
-      <p>Gibjohn Tutoring</p>
+    <div class="footer-bottom">
+      © 2026 GibJohn Tutoring. All rights reserved.
     </div>
   </footer>
+    </main>
+  </div>
 
   <script>
     const profileEmail = document.querySelector("#profile-email");
@@ -105,17 +132,32 @@
 
       rewards.forEach(function (reward) {
         const card = document.createElement("article");
-        card.className = "card";
+        card.className = "card reward-card";
+
+        const iconWrap = document.createElement("div");
+        iconWrap.className = "reward-card-icon";
+        iconWrap.setAttribute("aria-hidden", "true");
+        iconWrap.innerHTML =
+          '<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">' +
+          '<circle cx="12" cy="10" r="5" stroke="currentColor" stroke-width="1.8"></circle>' +
+          '<path d="M9.6 14.4L8.5 20L12 17.7L15.5 20L14.4 14.4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path>' +
+          "</svg>";
+
+        const body = document.createElement("div");
+        body.className = "reward-card-body";
 
         const title = document.createElement("h3");
+        title.className = "reward-card-title";
         title.textContent = reward && reward.badge_name ? reward.badge_name : "Reward";
 
         const detail = document.createElement("p");
-        detail.className = "subject-description";
+        detail.className = "reward-card-meta";
         detail.textContent = "Earned on " + formatEarnedDate(reward && reward.earned_at);
 
-        card.appendChild(title);
-        card.appendChild(detail);
+        body.appendChild(title);
+        body.appendChild(detail);
+        card.appendChild(iconWrap);
+        card.appendChild(body);
         rewardsContainer.appendChild(card);
       });
     }
@@ -143,30 +185,89 @@
         totalCompleted.textContent = "0";
         showRewardsMessage(error.message || "Unable to load rewards right now.", true, false);
       });
-  </script>
-  <script>
-    document.addEventListener("DOMContentLoaded", function () {
-      const hamburger = document.querySelector(".hamburger");
-      const navLinks = document.querySelector(".nav-links");
 
-      if (!hamburger || !navLinks) {
+    document.addEventListener("DOMContentLoaded", function () {
+      const hamburger = document.querySelector(".mobile-topbar .hamburger");
+      const sidebar = document.querySelector(".sidebar");
+      const overlay = document.querySelector("#sidebar-overlay");
+
+      function closeSidebar() {
+        if (!hamburger || !sidebar || !overlay) {
+          return;
+        }
+
+        sidebar.classList.remove("is-open");
+        overlay.classList.remove("is-visible");
+        hamburger.classList.remove("is-open");
+        hamburger.setAttribute("aria-expanded", "false");
+        document.body.classList.remove("menu-open");
+      }
+
+      if (!hamburger || !sidebar || !overlay) {
         return;
       }
 
       hamburger.addEventListener("click", function () {
-        const isOpen = navLinks.classList.toggle("is-open");
+        const isOpen = sidebar.classList.toggle("is-open");
+        overlay.classList.toggle("is-visible", isOpen);
         hamburger.classList.toggle("is-open", isOpen);
         hamburger.setAttribute("aria-expanded", isOpen ? "true" : "false");
+        document.body.classList.toggle("menu-open", isOpen);
       });
 
-      navLinks.querySelectorAll("a").forEach(function (link) {
+      overlay.addEventListener("click", closeSidebar);
+
+      document.querySelectorAll(".sidebar-nav a, .sidebar-footer a").forEach(function (link) {
         link.addEventListener("click", function () {
-          navLinks.classList.remove("is-open");
-          hamburger.classList.remove("is-open");
-          hamburger.setAttribute("aria-expanded", "false");
+          closeSidebar();
         });
       });
     });
+  </script>
+  <script>
+    (function footerAuthToggle() {
+      const footerDashboard = document.querySelector("#footer-dashboard");
+      const footerLogin = document.querySelector("#footer-login");
+      const footerRegister = document.querySelector("#footer-register");
+      const footerLogout = document.querySelector("#footer-logout");
+
+      if (!footerDashboard || !footerLogin || !footerRegister || !footerLogout) {
+        return;
+      }
+
+      function getDashboardPath(role) {
+        if (role === "tutor") {
+          return "tutor_dashboard.html";
+        }
+
+        return "learner_dashboard.html";
+      }
+
+      fetch("/gibjohn/api/auth/me.php")
+        .then(function (response) {
+          return response.json();
+        })
+        .then(function (data) {
+          if (data && data.success === true && data.logged_in === true) {
+            footerDashboard.hidden = false;
+            footerLogout.hidden = false;
+            footerLogin.hidden = true;
+            footerRegister.hidden = true;
+            footerDashboard.setAttribute("href", getDashboardPath(data.role));
+          } else {
+            footerDashboard.hidden = true;
+            footerLogout.hidden = true;
+            footerLogin.hidden = false;
+            footerRegister.hidden = false;
+          }
+        })
+        .catch(function () {
+          footerDashboard.hidden = true;
+          footerLogout.hidden = true;
+          footerLogin.hidden = false;
+          footerRegister.hidden = false;
+        });
+    })();
   </script>
 </body>
 </html>

@@ -6,63 +6,145 @@
   <title>Subject Content</title>
   <link rel="stylesheet" href="../assets/css/layout.css">
 </head>
-<body>
-  <header class="site-header">
-    <div class="container header-inner">
-      <a href="index.html" class="logo">GibJohn Learning</a>
-      <button class="hamburger" type="button" aria-label="Toggle navigation" aria-expanded="false">
-        <span></span>
-        <span></span>
-        <span></span>
-      </button>
-      <nav class="nav-links">
-        <a href="learner_dashboard.html">Dashboard</a>
-        <a href="profile.html">Profile</a>
-        <a href="/gibjohn/api/auth/logout.php">Logout</a>
-      </nav>
-    </div>
+<body class="app-shell">
+  <header class="mobile-topbar" aria-label="Mobile navigation bar">
+    <button class="hamburger" type="button" aria-label="Toggle sidebar" aria-expanded="false" aria-controls="learner-sidebar">
+      <span></span>
+      <span></span>
+      <span></span>
+    </button>
+    <a href="index.html" class="logo">GibJohn Learning</a>
   </header>
 
-  <main>
-    <div class="container">
-      <section class="page-header" aria-labelledby="subject-title">
-        <h1 id="subject-title" class="page-title">Subject Content</h1>
-        <p class="page-subtitle">Complete each learning activity in order and track your progress.</p>
-      </section>
+  <div class="sidebar-overlay" id="sidebar-overlay"></div>
 
-      <section aria-labelledby="content-heading">
-        <h2 id="content-heading" class="section-title">Learning Activities</h2>
-        <p id="reward-message" class="status-message reward-notice" hidden aria-live="polite"></p>
-        <div id="content-container" class="content-stack">
-          <p class="status-message">Loading content...</p>
-        </div>
-      </section>
+  <div class="app-layout">
+    <aside class="sidebar" id="learner-sidebar" aria-label="Learner sidebar">
+      <div class="sidebar-brand">
+        <a href="index.html" class="logo">GibJohn Learning</a>
+      </div>
+      <nav class="sidebar-nav" aria-label="Learner navigation">
+        <a href="learner_dashboard.html">Dashboard</a>
+        <a href="learner_dashboard.html#activity-overview">Progress</a>
+        <a href="profile.html">Profile</a>
+        <a href="#" aria-disabled="true">Settings</a>
+      </nav>
+      <div class="sidebar-footer">
+        <a class="btn btn-primary" href="/gibjohn/api/auth/logout.php">Logout</a>
+      </div>
+    </aside>
+
+    <main class="main-content">
+      <div class="main-content-inner">
+        <section class="page-header" aria-labelledby="subject-title">
+          <h1 id="subject-title" class="page-title">Subject Practice</h1>
+          <p class="page-subtitle">Answer each prompt and complete the activity to continue.</p>
+        </section>
+
+        <section class="question-layout" aria-live="polite">
+          <div class="question-topbar">
+            <button type="button" class="btn btn-secondary" id="back-button">Back to Dashboard</button>
+            <div class="question-progress">
+              <p id="question-counter" class="question-counter">Question 0 / 0</p>
+              <progress id="question-progress-bar" class="progress-meter" max="100" value="0" aria-label="Subject completion"></progress>
+              <div id="progress-dots" class="progress-indicator-dots" aria-hidden="true"></div>
+            </div>
+          </div>
+
+          <p id="reward-message" class="status-message reward-notice" hidden aria-live="polite"></p>
+          <p id="error-message" class="status-message error" hidden></p>
+
+          <article class="card question-card" id="question-card">
+            <h2 class="section-title" id="question-title">Loading question...</h2>
+            <p id="question-text" class="content-text">Please wait while content loads.</p>
+            <div class="diagram-placeholder" aria-hidden="true">Diagram Placeholder</div>
+
+            <div id="answer-options" class="answer-options"></div>
+
+            <div class="question-actions">
+              <button type="button" class="btn btn-primary" id="submit-answer" disabled>Submit Answer</button>
+            </div>
+          </article>
+
+          <article id="result-card" class="card result-card" hidden>
+            <h3>Answer Submitted</h3>
+            <p id="result-text" class="subject-meta">Your response has been recorded.</p>
+            <div class="question-actions">
+              <button type="button" class="btn btn-primary" id="continue-button">Continue</button>
+            </div>
+          </article>
+        </section>
+
+        <section class="completed-history-section" aria-labelledby="completed-history-title">
+          <h2 id="completed-history-title" class="section-title">Completed Activities</h2>
+          <div id="completed-history" class="content-stack">
+            <p class="status-message empty-state">No completed activities yet.</p>
+          </div>
+        </section>
+      </div>
+
+          <footer class="site-footer">
+    <div class="footer-inner">
+      <div class="footer-brand">
+        <h3>GibJohn Tutoring</h3>
+        <p>Structured learning. Real progress.</p>
+      </div>
+
+      <div class="footer-links">
+        <a href="index.html" id="footer-home">Home</a>
+        <a href="learner_dashboard.html" id="footer-dashboard" hidden>Dashboard</a>
+        <a href="login.html" id="footer-login">Login</a>
+        <a href="register.html" id="footer-register">Register</a>
+        <a href="/gibjohn/api/auth/logout.php" id="footer-logout" hidden>Logout</a>
+      </div>
     </div>
-  </main>
 
-  <footer class="site-footer">
-    <div class="container">
-      <p>Gibjohn Tutoring</p>
+    <div class="footer-bottom">
+      © 2026 GibJohn Tutoring. All rights reserved.
     </div>
   </footer>
+    </main>
+  </div>
 
   <script>
-    const contentContainer = document.querySelector("#content-container");
     const rewardMessage = document.querySelector("#reward-message");
+    const errorMessage = document.querySelector("#error-message");
+    const questionTitle = document.querySelector("#question-title");
+    const questionText = document.querySelector("#question-text");
+    const answerOptions = document.querySelector("#answer-options");
+    const submitAnswer = document.querySelector("#submit-answer");
+    const continueButton = document.querySelector("#continue-button");
+    const resultCard = document.querySelector("#result-card");
+    const resultText = document.querySelector("#result-text");
+    const questionCounter = document.querySelector("#question-counter");
+    const questionProgressBar = document.querySelector("#question-progress-bar");
+    const progressDots = document.querySelector("#progress-dots");
+    const backButton = document.querySelector("#back-button");
+    const completedHistory = document.querySelector("#completed-history");
+
     const params = new URLSearchParams(window.location.search);
     const subjectId = params.get("subject_id");
 
-    function showMessage(text, isError, isEmpty) {
-      contentContainer.textContent = "";
-      const message = document.createElement("p");
-      message.className = isError ? "status-message error" : "status-message";
+    const optionLabels = [
+      "I can explain this clearly.",
+      "I understand most of it.",
+      "I need a quick revision.",
+      "I need tutor support."
+    ];
 
-      if (isEmpty) {
-        message.className += " empty-state";
-      }
+    let contentItems = [];
+    let currentIndex = 0;
+    let selectedOption = "";
+    let submitted = false;
 
-      message.textContent = text;
-      contentContainer.appendChild(message);
+    function showError(text) {
+      errorMessage.hidden = false;
+      errorMessage.textContent = text;
+    }
+
+    function clearError() {
+      errorMessage.hidden = true;
+      errorMessage.textContent = "";
     }
 
     function parseJsonSafely(rawText) {
@@ -85,16 +167,144 @@
       return [];
     }
 
-    function setCompletedState(card, badge, button) {
-      card.classList.add("is-completed");
-      badge.className = "status-badge completed";
-      badge.textContent = "Completed";
-      button.textContent = "Completed";
-      button.disabled = true;
+    function getCompletedCount() {
+      return contentItems.filter(function (item) {
+        return Number(item && item.completed) === 1;
+      }).length;
+    }
+
+    function updateProgressUI() {
+      const total = contentItems.length;
+      const currentQuestionNumber = total === 0 ? 0 : Math.min(currentIndex + 1, total);
+      const completed = getCompletedCount();
+      const progressValue = total > 0 ? Math.round((completed / total) * 100) : 0;
+
+      questionCounter.textContent = "Question " + currentQuestionNumber + " / " + total;
+      questionProgressBar.value = progressValue;
+
+      progressDots.textContent = "";
+      contentItems.forEach(function (item, index) {
+        const dot = document.createElement("span");
+        dot.className = "dot";
+
+        if (Number(item && item.completed) === 1) {
+          dot.classList.add("completed");
+        } else if (index === currentIndex) {
+          dot.classList.add("current");
+        }
+
+        progressDots.appendChild(dot);
+      });
+    }
+
+    function renderCompletedHistory() {
+      if (!completedHistory) {
+        return;
+      }
+
+      completedHistory.textContent = "";
+      const completedItems = contentItems.filter(function (item) {
+        return Number(item && item.completed) === 1;
+      });
+
+      if (completedItems.length === 0) {
+        const emptyMessage = document.createElement("p");
+        emptyMessage.className = "status-message empty-state";
+        emptyMessage.textContent = "No completed activities yet.";
+        completedHistory.appendChild(emptyMessage);
+        return;
+      }
+
+      completedItems.forEach(function (item) {
+        const card = document.createElement("article");
+        card.className = "card content-card is-completed";
+
+        const meta = document.createElement("div");
+        meta.className = "content-meta";
+
+        const title = document.createElement("h3");
+        title.textContent = "Activity " + String(item && item.content_order ? item.content_order : "?");
+
+        const status = document.createElement("span");
+        status.className = "status-badge completed";
+        status.textContent = "Completed";
+
+        const text = document.createElement("p");
+        text.className = "content-text";
+        text.textContent = item && item.content_text ? item.content_text : "No content text available.";
+
+        meta.appendChild(title);
+        meta.appendChild(status);
+        card.appendChild(meta);
+        card.appendChild(text);
+        completedHistory.appendChild(card);
+      });
+    }
+
+    function renderAnswerOptions() {
+      answerOptions.textContent = "";
+
+      optionLabels.forEach(function (label) {
+        const button = document.createElement("button");
+        button.type = "button";
+        button.className = "answer-option";
+        button.textContent = label;
+
+        if (selectedOption === label) {
+          button.classList.add("selected");
+        }
+
+        button.addEventListener("click", function () {
+          selectedOption = label;
+          submitAnswer.disabled = false;
+          renderAnswerOptions();
+        });
+
+        answerOptions.appendChild(button);
+      });
+    }
+
+    function renderQuestion() {
+      clearError();
+      resultCard.hidden = true;
+      submitted = false;
+      selectedOption = "";
+      submitAnswer.disabled = true;
+
+      if (contentItems.length === 0) {
+        questionTitle.textContent = "No Content Found";
+        questionText.textContent = "No learning activities are available for this subject yet.";
+        answerOptions.textContent = "";
+        updateProgressUI();
+        renderCompletedHistory();
+        return;
+      }
+
+      if (currentIndex >= contentItems.length) {
+        questionTitle.textContent = "Subject Completed";
+        questionText.textContent = "You have completed all activities in this subject.";
+        answerOptions.textContent = "";
+        submitAnswer.disabled = true;
+        updateProgressUI();
+        renderCompletedHistory();
+        return;
+      }
+
+      const item = contentItems[currentIndex];
+      questionTitle.textContent = "Activity " + (currentIndex + 1);
+      questionText.textContent = item && item.content_text ? item.content_text : "No content text available.";
+      renderAnswerOptions();
+      updateProgressUI();
+      renderCompletedHistory();
+
+      if (Number(item && item.completed) === 1) {
+        resultCard.hidden = false;
+        resultText.textContent = "This activity is already completed. Continue to the next one.";
+      }
     }
 
     function showRewardMessage(reward) {
-      if (!rewardMessage || !reward || !reward.name) {
+      if (!reward || !reward.name) {
         return;
       }
 
@@ -103,96 +313,119 @@
       rewardMessage.textContent = "Reward earned: " + reward.name;
     }
 
-    async function markComplete(contentId, button, card, badge) {
-      button.disabled = true;
-      button.textContent = "Saving...";
+    function getRewardNameFromResponse(data) {
+      if (!data) {
+        return null;
+      }
 
-      try {
-        const formData = new FormData();
-        formData.append("content_id", contentId);
+      if (data.reward && typeof data.reward === "string") {
+        return data.reward;
+      }
 
-        const response = await fetch("/gibjohn/api/learner/complete_activity.php", {
-          method: "POST",
-          body: formData
-        });
-
-        const raw = await response.text();
-        const data = parseJsonSafely(raw);
-
-        if (!response.ok || !data || data.success !== true) {
-          throw new Error((data && data.error) ? data.error : "Could not mark complete.");
+      if (data.reward && typeof data.reward === "object") {
+        if (data.reward.name) {
+          return data.reward.name;
         }
 
-        setCompletedState(card, badge, button);
-
-        if (data.reward && data.reward.name) {
-          showRewardMessage(data.reward);
-        } else if (data.new_reward) {
-          showRewardMessage({ name: data.new_reward });
+        if (data.reward.badge_name) {
+          return data.reward.badge_name;
         }
-      } catch (error) {
-        button.disabled = false;
-        button.textContent = "Mark Complete";
-        showMessage(error.message || "Unable to mark content complete.", true, false);
+
+        if (data.reward.reward_type) {
+          return data.reward.reward_type;
+        }
+      }
+
+      if (typeof data.new_reward === "string" && data.new_reward.trim() !== "") {
+        return data.new_reward;
+      }
+
+      return null;
+    }
+
+    async function markComplete(contentId) {
+      const formData = new FormData();
+      formData.append("content_id", contentId);
+
+      const response = await fetch("/gibjohn/api/learner/complete_activity.php", {
+        method: "POST",
+        body: formData
+      });
+
+      const raw = await response.text();
+      const data = parseJsonSafely(raw);
+
+      if (!response.ok || !data || data.success !== true) {
+        throw new Error((data && data.error) ? data.error : "Could not mark complete.");
+      }
+
+      const rewardName = getRewardNameFromResponse(data);
+      if (rewardName) {
+        showRewardMessage({ name: rewardName });
       }
     }
 
-    function renderContentItems(items) {
-      if (!Array.isArray(items) || items.length === 0) {
-        showMessage("No content found for this subject.", false, true);
+    function moveToNextQuestion() {
+      if (currentIndex < contentItems.length - 1) {
+        currentIndex += 1;
+      } else {
+        currentIndex = contentItems.length;
+      }
+
+      renderQuestion();
+    }
+
+    submitAnswer.addEventListener("click", function () {
+      if (!selectedOption || currentIndex >= contentItems.length) {
         return;
       }
 
-      contentContainer.textContent = "";
+      submitted = true;
+      resultCard.hidden = false;
+      resultText.textContent = "Answer saved. Click continue to mark this activity complete.";
+    });
 
-      items.forEach(function (item, index) {
-        const card = document.createElement("article");
-        card.className = "card content-card";
+    continueButton.addEventListener("click", async function () {
+      if (!submitted && currentIndex < contentItems.length && Number(contentItems[currentIndex].completed) !== 1) {
+        return;
+      }
 
-        const meta = document.createElement("div");
-        meta.className = "content-meta";
+      if (currentIndex >= contentItems.length) {
+        window.location.href = "learner_dashboard.html";
+        return;
+      }
 
-        const title = document.createElement("h3");
-        title.textContent = "Activity " + (index + 1);
+      const item = contentItems[currentIndex];
 
-        const badge = document.createElement("span");
-        badge.className = "status-badge";
-        badge.textContent = "Pending";
+      if (Number(item && item.completed) === 1) {
+        moveToNextQuestion();
+        return;
+      }
 
-        const text = document.createElement("p");
-        text.className = "content-text";
-        text.textContent = item && item.content_text ? item.content_text : "No content text available.";
+      continueButton.disabled = true;
+      continueButton.textContent = "Saving...";
 
-        const actions = document.createElement("div");
-        actions.className = "content-actions";
+      try {
+        await markComplete(item.id);
+        item.completed = 1;
+        moveToNextQuestion();
+      } catch (error) {
+        showError(error.message || "Unable to mark content complete.");
+      } finally {
+        continueButton.disabled = false;
+        continueButton.textContent = "Continue";
+      }
+    });
 
-        const button = document.createElement("button");
-        button.type = "button";
-        button.className = "btn btn-primary";
-        button.textContent = "Mark Complete";
-
-        const isCompleted = Number(item && item.completed) === 1;
-        if (isCompleted) {
-          setCompletedState(card, badge, button);
-        } else {
-          button.addEventListener("click", function () {
-            markComplete(item.id, button, card, badge);
-          });
-        }
-
-        meta.appendChild(title);
-        meta.appendChild(badge);
-        actions.appendChild(button);
-
-        card.appendChild(meta);
-        card.appendChild(text);
-        card.appendChild(actions);
-        contentContainer.appendChild(card);
-      });
-    }
+    backButton.addEventListener("click", function () {
+      window.location.href = "learner_dashboard.html";
+    });
 
     if (!subjectId) {
-      showMessage("Missing subject_id in URL.", true, false);
+      showError("Missing subject_id in URL.");
+      questionTitle.textContent = "Invalid Subject";
+      questionText.textContent = "Open a subject from your dashboard to continue.";
+      submitAnswer.disabled = true;
     } else {
       fetch("/gibjohn/api/learner/get_content.php?subject_id=" + encodeURIComponent(subjectId))
         .then(function (response) {
@@ -207,36 +440,107 @@
             throw new Error((data && data.error) ? data.error : "Failed to load subject content.");
           }
 
-          renderContentItems(toContentItems(data));
+          contentItems = toContentItems(data);
+          currentIndex = contentItems.findIndex(function (item) {
+            return Number(item && item.completed) !== 1;
+          });
+
+          if (currentIndex < 0) {
+            currentIndex = contentItems.length;
+          }
+
+          renderQuestion();
         })
         .catch(function (error) {
-          showMessage(error.message || "Unable to load subject content.", true, false);
+          showError(error.message || "Unable to load subject content.");
+          questionTitle.textContent = "Load Error";
+          questionText.textContent = "Please go back and try again.";
+          submitAnswer.disabled = true;
         });
     }
-  </script>
-  <script>
-    document.addEventListener("DOMContentLoaded", function () {
-      const hamburger = document.querySelector(".hamburger");
-      const navLinks = document.querySelector(".nav-links");
 
-      if (!hamburger || !navLinks) {
+    document.addEventListener("DOMContentLoaded", function () {
+      const hamburger = document.querySelector(".mobile-topbar .hamburger");
+      const sidebar = document.querySelector(".sidebar");
+      const overlay = document.querySelector("#sidebar-overlay");
+
+      function closeSidebar() {
+        if (!hamburger || !sidebar || !overlay) {
+          return;
+        }
+
+        sidebar.classList.remove("is-open");
+        overlay.classList.remove("is-visible");
+        hamburger.classList.remove("is-open");
+        hamburger.setAttribute("aria-expanded", "false");
+        document.body.classList.remove("menu-open");
+      }
+
+      if (!hamburger || !sidebar || !overlay) {
         return;
       }
 
       hamburger.addEventListener("click", function () {
-        const isOpen = navLinks.classList.toggle("is-open");
+        const isOpen = sidebar.classList.toggle("is-open");
+        overlay.classList.toggle("is-visible", isOpen);
         hamburger.classList.toggle("is-open", isOpen);
         hamburger.setAttribute("aria-expanded", isOpen ? "true" : "false");
+        document.body.classList.toggle("menu-open", isOpen);
       });
 
-      navLinks.querySelectorAll("a").forEach(function (link) {
+      overlay.addEventListener("click", closeSidebar);
+
+      document.querySelectorAll(".sidebar-nav a, .sidebar-footer a").forEach(function (link) {
         link.addEventListener("click", function () {
-          navLinks.classList.remove("is-open");
-          hamburger.classList.remove("is-open");
-          hamburger.setAttribute("aria-expanded", "false");
+          closeSidebar();
         });
       });
     });
+  </script>
+  <script>
+    (function footerAuthToggle() {
+      const footerDashboard = document.querySelector("#footer-dashboard");
+      const footerLogin = document.querySelector("#footer-login");
+      const footerRegister = document.querySelector("#footer-register");
+      const footerLogout = document.querySelector("#footer-logout");
+
+      if (!footerDashboard || !footerLogin || !footerRegister || !footerLogout) {
+        return;
+      }
+
+      function getDashboardPath(role) {
+        if (role === "tutor") {
+          return "tutor_dashboard.html";
+        }
+
+        return "learner_dashboard.html";
+      }
+
+      fetch("/gibjohn/api/auth/me.php")
+        .then(function (response) {
+          return response.json();
+        })
+        .then(function (data) {
+          if (data && data.success === true && data.logged_in === true) {
+            footerDashboard.hidden = false;
+            footerLogout.hidden = false;
+            footerLogin.hidden = true;
+            footerRegister.hidden = true;
+            footerDashboard.setAttribute("href", getDashboardPath(data.role));
+          } else {
+            footerDashboard.hidden = true;
+            footerLogout.hidden = true;
+            footerLogin.hidden = false;
+            footerRegister.hidden = false;
+          }
+        })
+        .catch(function () {
+          footerDashboard.hidden = true;
+          footerLogout.hidden = true;
+          footerLogin.hidden = false;
+          footerRegister.hidden = false;
+        });
+    })();
   </script>
 </body>
 </html>
